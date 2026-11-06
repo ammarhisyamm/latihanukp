@@ -1,0 +1,133 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --font-sans: system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--background);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--primary);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-primary-foreground: var(--primary-foreground);
+  --color-sidebar-accent: var(--accent);
+  --color-sidebar-accent-foreground: var(--primary);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--primary);
+  --color-invert-foreground: var(--invert-foreground);
+  --color-invert: var(--invert);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning: var(--warning);
+  --color-info-foreground: var(--info-foreground);
+  --color-info: var(--info);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
+}
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.235 0.014 265);
+  --primary: oklch(0.465 0.14 262);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.975 0.004 260);
+  --muted: oklch(0.975 0.003 260);
+  --muted-foreground: oklch(0.55 0.015 260);
+  --accent: oklch(0.962 0.018 263);
+  --border: oklch(0.923 0.007 260);
+  --card: oklch(1 0 0);
+  --destructive: oklch(0.57 0.18 25);
+  --brand-orange: oklch(0.77 0.165 70);
+  --brand-orange-soft: oklch(0.969 0.032 77);
+  --orange-ink: oklch(0.56 0.12 65);
+  --soft-green: oklch(0.954 0.025 155);
+  --green-ink: oklch(0.48 0.095 155);
+  --error-soft: oklch(0.964 0.019 25);
+  --hero-tint: oklch(0.963 0.022 263);
+  --shadow-card: 0 2px 5px oklch(0.23 0.014 265 / 0.035);
+  --shadow-dialog: 0 24px 90px oklch(0.23 0.014 265 / 0.18);
+  --overlay: oklch(0.23 0.014 265 / 0.25);
+  --radius: 6px;
+  --destructive-foreground: var(--color-red-800);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-900);
+  --info: var(--color-violet-500);
+  --info-foreground: var(--color-violet-900);
+  --warning: var(--color-yellow-500);
+  --warning-foreground: var(--color-yellow-900);
+  --invert: var(--color-zinc-900);
+  --invert-foreground: var(--color-zinc-50);
+}
+@layer base {
+  * {
+    border-color: var(--border);
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+  a {
+    text-decoration: none;
+  }
+  button,
+  a,
+  input,
+  select,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+  ::selection {
+    background: var(--accent);
+  }
+}
+
+.ukp-shell {
+  font-family: system-ui, sans-serif;
+  --background: #f8fafc;
+  --foreground: #172033;
+  --card: #fff;
+  --muted: #edf1f6;
+  --muted-foreground: #4b586e;
+  --primary: #1e4b9d;
+  --primary-foreground: #fff;
+  --border: #dbe2ec;
+  --radius: 8px;
+}
