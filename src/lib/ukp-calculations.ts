@@ -374,30 +374,51 @@ const patterns = {
   ],
 } satisfies Record<UkpTopic, Pattern[]>;
 
+export const calculationVariants = 32;
+
+function variant(level: UkpLevel, topic: UkpTopic, item: Pattern, n: number): Question {
+  const [prompt, amount, wrong, working] = item.solve(n);
+  const options = [...new Set([amount, ...wrong].map((value) => rp(Math.round(value))))];
+  for (let offset = 1; options.length < 4; offset++) {
+    const value = rp(amount + offset * Math.max(1000, Math.round(amount * 0.04)));
+    if (!options.includes(value)) options.push(value);
+  }
+  return {
+    id: `calc-${item.id}-${n}`,
+    family: item.id,
+    kind: "hitung",
+    prompt,
+    options: [options[0]!, options[1]!, options[2]!, options[3]!],
+    answer: 0,
+    explanation: `${working} Hasilnya ${rp(amount)}.`,
+    bookletItem: item.items[level]!,
+    bookletPage: getBookletItems(level, topic).find(([number]) => number === item.items[level])?.[2],
+    legalSource: { label: item.rule, href: item.href },
+  };
+}
+
+function levelPatterns(level: UkpLevel, topic: UkpTopic) {
+  return patterns[topic].filter((item) => item.levels.includes(level));
+}
+
+/** Semua variasi angka (dipakai pengujian kunci). Tidak masuk bank soal utama. */
 export function getCalculationQuestions(level: UkpLevel, topic: UkpTopic): Question[] {
-  return patterns[topic]
-    .filter((item) => item.levels.includes(level))
-    .flatMap((item) =>
-      Array.from({ length: 32 }, (_, index): Question => {
-        const [prompt, amount, wrong, working] = item.solve(index + 1);
-        const options = [...new Set([amount, ...wrong].map((value) => rp(Math.round(value))))];
-        for (let offset = 1; options.length < 4; offset++) {
-          const value = rp(amount + offset * Math.max(1000, Math.round(amount * 0.04)));
-          if (!options.includes(value)) options.push(value);
-        }
-        return {
-          id: `calc-${item.id}-${index + 1}`,
-          family: item.id,
-          prompt,
-          options: [options[0]!, options[1]!, options[2]!, options[3]!],
-          answer: 0,
-          explanation: `${working} Hasilnya ${rp(amount)}.`,
-          bookletItem: item.items[level]!,
-          bookletPage: getBookletItems(level, topic).find(
-            ([number]) => number === item.items[level],
-          )![2],
-          legalSource: { label: item.rule, href: item.href },
-        };
-      }),
-    );
+  return levelPatterns(level, topic).flatMap((item) =>
+    Array.from({ length: calculationVariants }, (_, index) => variant(level, topic, item, index + 1)),
+  );
+}
+
+export function countCalculationPatterns(level: UkpLevel, topic: UkpTopic) {
+  return levelPatterns(level, topic).length;
+}
+
+/** Satu variasi angka acak per pola, untuk drill hitung. */
+export function drawCalculationQuestions(
+  level: UkpLevel,
+  topic: UkpTopic,
+  random: () => number = Math.random,
+): Question[] {
+  return levelPatterns(level, topic).map((item) =>
+    variant(level, topic, item, 1 + Math.floor(random() * calculationVariants)),
+  );
 }

@@ -1,0 +1,996 @@
+import type { TopicContent } from "./types";
+
+const B = ["b"] as const;
+
+const content: TopicContent = {
+  summary: [
+    {
+      id: "subjek-objek",
+      title: "Subjek PBB dan objek yang dikecualikan",
+      levels: B,
+      bookletItem: { b: "1" },
+      points: [
+        "Subjek PBB adalah orang atau badan yang secara nyata mempunyai suatu hak atas bumi dan/atau memperoleh manfaat atas bumi, dan/atau memiliki, menguasai, dan/atau memperoleh manfaat atas bangunan (Pasal 4 ayat (1)).",
+        "Bila subjek belum jelas, DJP dapat menetapkan subjek; yang ditetapkan dapat memberi keterangan tertulis paling lama 1 bulan sejak menerima pemberitahuan, dan DJP memutus paling lama 1 bulan sejak keterangan diterima (lewat waktu, keterangan dianggap disetujui).",
+        "Dikecualikan (Pasal 3 ayat (1)): objek yang digunakan semata-mata untuk kepentingan umum di bidang ibadah, sosial, kesehatan, pendidikan, dan kebudayaan nasional yang tidak dimaksudkan memperoleh keuntungan.",
+        "Juga dikecualikan: kuburan, peninggalan purbakala, hutan lindung, hutan suaka alam, hutan wisata, taman nasional, tanah penggembalaan yang dikuasai desa, dan tanah negara yang belum dibebani suatu hak.",
+        "Kantor perwakilan diplomatik/konsulat dikecualikan berdasarkan asas timbal balik, dan kantor organisasi internasional yang ditetapkan Menteri Keuangan juga dikecualikan.",
+        "Sejak UU HKPD, PBB perdesaan dan perkotaan (P2) menjadi pajak daerah; DJP mengelola PBB-P5L (perkebunan, perhutanan, pertambangan, dan sektor lainnya).",
+      ],
+      traps: [
+        "Rumah sakit atau sekolah yang dikelola untuk mencari keuntungan tidak termasuk pengecualian.",
+        "Subjek tidak harus pemilik sertifikat; pihak yang menguasai atau memanfaatkan secara nyata juga dapat menjadi subjek.",
+      ],
+      legal: "Pasal 3 dan 4 UU 12/1985 s.t.d.d. UU 12/1994 (UU PBB).",
+    },
+    {
+      id: "sektor-njop",
+      title: "Sektor PBB-P5L dan komponen NJOP",
+      levels: B,
+      bookletItem: { b: "2" },
+      points: [
+        "Sektor PBB-P5L: perkebunan, perhutanan, pertambangan minyak dan gas bumi, pertambangan panas bumi, pertambangan mineral atau batubara, dan sektor lainnya (mis. perikanan tangkap, pembudidayaan ikan, jalan tol, jaringan pipa/kabel).",
+        "NJOP adalah harga rata-rata transaksi jual beli yang wajar; bila tidak ada, ditentukan dengan perbandingan harga objek sejenis, nilai perolehan baru, atau NJOP pengganti.",
+        "NJOP ditetapkan setiap tiga tahun oleh Menteri Keuangan, kecuali untuk daerah tertentu ditetapkan setiap tahun sesuai perkembangan daerahnya.",
+        "Perkebunan: NJOP bumi areal produktif ditambah biaya investasi tanaman, ditambah areal belum produktif, tidak produktif, pengaman, emplasemen, dan NJOP bangunan.",
+        "Migas dan minerba: NJOP terdiri atas bumi permukaan (onshore dan offshore), tubuh bumi, dan bangunan.",
+        "Luas dikonversi ke m² sebelum dikalikan NJOP per m² (1 ha = 10.000 m²), dan tiap komponen dijumlahkan satu kali saja.",
+      ],
+      table: {
+        head: ["Sektor", "Komponen NJOP utama"],
+        rows: [
+          ["Perkebunan", "Areal produktif + investasi tanaman, areal lain, bangunan"],
+          ["Perhutanan", "Areal produktif (hutan alam/tanaman), areal lain, bangunan"],
+          ["Migas, panas bumi, minerba", "Permukaan onshore/offshore, tubuh bumi, bangunan"],
+          ["Lainnya", "Bumi dan bangunan objek usaha lain (perikanan, jalan tol, pipa)"],
+        ],
+      },
+      traps: [
+        "Menambahkan investasi tanaman dua kali bila NJOP areal produktif sudah mencakupnya.",
+        "Rumah tinggal biasa di permukiman termasuk PBB-P2 (pajak daerah), bukan P5L.",
+      ],
+      legal: "Pasal 1 dan 6 UU PBB; PMK 186/2019 s.t.d.d. PMK 234/2022.",
+    },
+    {
+      id: "njkp-tarif",
+      title: "NJOPTKP, NJKP, tarif, dan PBB terutang",
+      levels: B,
+      bookletItem: { b: "2" },
+      points: [
+        "Urutan hitung: NJOP − NJOPTKP = NJOP untuk penghitungan; × persentase NJKP = NJKP; × tarif 0,5% = PBB terutang.",
+        "NJOPTKP PBB selain P2 ditetapkan Rp12 juta untuk setiap wajib pajak (PMK 23/2014), bukan untuk setiap objek.",
+        "Bila WP memiliki beberapa objek, NJOPTKP diberikan satu kali pada objek dengan NJOP terbesar.",
+        "UU PBB membatasi NJKP 20%–100% dari NJOP; PP 25/2002 menetapkan 40% untuk objek perkebunan, kehutanan, dan pertambangan.",
+        "Untuk objek lainnya, PP 25/2002 menetapkan NJKP 40% bila NJOP ≥ Rp1 miliar dan 20% bila NJOP < Rp1 miliar.",
+        "Tarif PBB tunggal 0,5% (Pasal 5); dengan NJKP 40%, beban efektif = 0,2% × (NJOP − NJOPTKP).",
+      ],
+      table: {
+        head: ["Objek", "NJKP (PP 25/2002)", "Tarif efektif"],
+        rows: [
+          ["Perkebunan", "40%", "0,2%"],
+          ["Kehutanan/perhutanan", "40%", "0,2%"],
+          ["Pertambangan", "40%", "0,2%"],
+          ["Lainnya, NJOP ≥ Rp1 miliar / < Rp1 miliar", "40% / 20%", "0,2% / 0,1%"],
+        ],
+      },
+      traps: [
+        "Mengurangkan Rp12 juta dari PBB terutang, padahal NJOPTKP dikurangkan dari NJOP.",
+        "Mengurangkan NJOPTKP pada setiap objek milik WP yang sama.",
+        "Mengalikan 0,5% langsung pada NJOP tanpa NJKP.",
+      ],
+      legal: "Pasal 3 ayat (3), 5, 6 UU PBB; PP 25/2002; PMK 23/PMK.03/2014.",
+    },
+    {
+      id: "spop-sppt-skp",
+      title: "SPOP, SPPT, SKP, jatuh tempo, dan denda",
+      levels: B,
+      bookletItem: { b: "2" },
+      points: [
+        "Tahun pajak adalah tahun takwim, dan saat yang menentukan pajak terutang adalah keadaan objek pada 1 Januari.",
+        "Subjek mendaftarkan objek dengan SPOP yang diisi jelas, benar, lengkap, dan dikembalikan paling lambat 30 hari setelah diterima.",
+        "SPPT diterbitkan berdasarkan SPOP dan wajib dilunasi paling lambat 6 bulan sejak diterima.",
+        "SKP diterbitkan bila SPOP tidak dikembalikan setelah ditegur, atau bila hasil pemeriksaan/keterangan lain menunjukkan pajak lebih besar; SKP dilunasi paling lambat 1 bulan sejak diterima.",
+        "SKP karena hasil pemeriksaan = selisih pajak + denda 25% dari selisih; SKP karena SPOP tidak dikembalikan = pokok + denda 25% dari pokok.",
+        "Keterlambatan pelunasan dikenai denda 2% sebulan dari saat jatuh tempo, paling lama 24 bulan (maksimum 48%), ditagih dengan STP PBB.",
+      ],
+      table: {
+        head: ["Dokumen/kewajiban", "Batas waktu"],
+        rows: [
+          ["Pengembalian SPOP", "30 hari setelah diterima"],
+          ["Pelunasan SPPT", "6 bulan sejak diterima"],
+          ["Pelunasan SKP", "1 bulan sejak diterima"],
+          ["Denda telat bayar", "2% sebulan, maks. 24 bulan"],
+        ],
+      },
+      traps: [
+        "Bangunan yang selesai setelah 1 Januari baru menjadi objek tahun berikutnya.",
+        "Denda 25% SKP hasil pemeriksaan dihitung dari selisih, bukan dari seluruh pokok.",
+      ],
+      legal: "Pasal 7 sampai 11 UU PBB.",
+    },
+    {
+      id: "keberatan-banding",
+      title: "Keberatan dan banding PBB",
+      levels: B,
+      bookletItem: { b: "3" },
+      points: [
+        "Keberatan dapat diajukan atas SPPT atau SKP PBB paling lambat 3 bulan sejak tanggal diterima, kecuali karena keadaan di luar kekuasaan WP.",
+        "Satu surat keberatan untuk satu SPPT/SKP, dalam bahasa Indonesia, dengan alasan yang jelas dan ditandatangani WP, wakil, atau kuasa.",
+        "Pengajuan keberatan atas SPPT/SKP PBB tidak menunda kewajiban membayar PBB terutang, tetapi pelunasan bukan syarat formal keberatan PBB.",
+        "DJP memutus keberatan paling lama 12 bulan sejak surat keberatan diterima; bila lewat, keberatan dianggap diterima.",
+        "Atas keputusan keberatan, WP dapat mengajukan banding ke Pengadilan Pajak paling lambat 3 bulan sejak keputusan diterima.",
+        "Keberatan yang telah dicabut tidak dapat diajukan kembali, dan WP tidak dapat lagi mengajukan pengurangan/pembatalan SPPT yang tidak benar atas ketetapan yang sama.",
+      ],
+      table: {
+        head: ["Tahap", "Batas waktu"],
+        rows: [
+          ["Mengajukan keberatan", "3 bulan sejak SPPT/SKP diterima"],
+          ["Keputusan keberatan", "12 bulan sejak surat diterima"],
+          ["Mengajukan banding", "3 bulan sejak keputusan diterima"],
+        ],
+      },
+      traps: [
+        "Mengira keberatan menunda kewajiban bayar.",
+        "Tertukar 12 bulan (keputusan keberatan) dengan 6 bulan (pelunasan SPPT).",
+      ],
+      legal: "Pasal 15 sampai 17 UU PBB; PMK 118/2024 s.t.d.d. PMK 71/2026.",
+    },
+    {
+      id: "pengurangan",
+      title: "Pengurangan PBB (Pasal 19)",
+      levels: B,
+      bookletItem: { b: "3" },
+      points: [
+        "Pengurangan pokok PBB dapat diberikan karena kondisi tertentu objek yang berhubungan dengan subjek atau sebab tertentu lainnya, serta karena bencana alam atau sebab luar biasa.",
+        "Batas pengurangan paling tinggi 75% untuk kondisi tertentu subjek (mis. WP badan rugi komersial dan kesulitan likuiditas 2 tahun berturut-turut) dan paling tinggi 100% untuk bencana alam atau sebab luar biasa.",
+        "Permohonan diajukan paling lambat 3 bulan sejak SPPT diterima atau 1 bulan sejak SKP/STP diterima, satu permohonan untuk satu objek.",
+        "Syarat utama: WP tidak sedang mengajukan keberatan atas SPPT/SKP yang sama (atau keberatannya sudah dicabut).",
+        "Keputusan diterbitkan paling lama 4 bulan sejak permohonan diterima; bila lewat, permohonan dianggap dikabulkan (PMK 129/2023).",
+        "Kanwil DJP dapat memberikan pengurangan secara jabatan sampai 100% untuk objek yang terkena bencana alam yang statusnya ditetapkan pemerintah.",
+      ],
+      table: {
+        head: ["Alasan", "Maksimum"],
+        rows: [
+          ["Kondisi tertentu subjek (kesulitan keuangan)", "75%"],
+          ["Bencana alam / sebab luar biasa", "100%"],
+          ["Secara jabatan karena bencana", "100%"],
+        ],
+      },
+      traps: [
+        "Persentase yang diminta WP tidak otomatis dikabulkan; batasnya 75% untuk kesulitan keuangan.",
+        "Pengurangan menghapus sebagian pokok, berbeda dengan pembetulan yang memperbaiki kesalahan tulis atau hitung.",
+      ],
+      legal: "Pasal 19 UU PBB; PMK 129/2023.",
+    },
+    {
+      id: "pembetulan-pembatalan",
+      title: "Pembetulan, pembatalan, dan pengurangan denda PBB",
+      levels: B,
+      bookletItem: { b: "3" },
+      points: [
+        "Pembetulan memperbaiki kesalahan tulis, kesalahan hitung, dan/atau kekeliruan penerapan ketentuan dalam SPPT, SKP PBB, atau STP PBB, atas permohonan atau secara jabatan.",
+        "Keputusan pembetulan diterbitkan paling lama 6 bulan sejak permohonan diterima; bila lewat, permohonan dianggap dikabulkan (PMK 118/2024 Pasal 6).",
+        "WP dapat mengajukan pengurangan atau pembatalan SPPT/SKP PBB yang tidak benar paling banyak 2 kali, sepanjang tidak diajukan keberatan atau keberatannya telah dicabut.",
+        "Permohonan pengurangan denda administratif PBB diajukan karena kekhilafan atau bukan kesalahan WP, paling banyak 2 kali, dan diputus paling lama 6 bulan.",
+        "Sengketa materi seperti besarnya NJOP atau luas objek diselesaikan melalui keberatan, bukan pembetulan.",
+        "Setelah mencabut keberatan, WP masih dapat mengajukan pengurangan denda administratif PBB.",
+      ],
+      table: {
+        head: ["Jalur", "Untuk", "Keputusan"],
+        rows: [
+          ["Pembetulan", "Salah tulis/hitung/penerapan", "6 bulan"],
+          ["Pengurangan/pembatalan ketetapan tidak benar", "Ketetapan tidak benar, maks. 2 kali", "6 bulan"],
+          ["Pengurangan denda PBB", "Kekhilafan/bukan kesalahan WP, maks. 2 kali", "6 bulan"],
+        ],
+      },
+      traps: [
+        "Memakai pembetulan untuk sengketa nilai NJOP.",
+        "Mengira pencabutan keberatan menutup semua jalur, padahal pengurangan denda tetap terbuka.",
+      ],
+      legal: "Pasal 20 UU PBB; Pasal 36 UU KUP; PMK 118/2024 s.t.d.d. PMK 71/2026.",
+    },
+  ],
+  questions: [
+    // subjek-objek
+    {
+      id: "pbb-001",
+      levels: B,
+      section: "subjek-objek",
+      kind: "konsep",
+      prompt: "Siapa yang dapat menjadi subjek PBB atas suatu objek?",
+      options: [
+        "Pihak yang secara nyata mempunyai hak atau memperoleh manfaat atas objek",
+        "Hanya nama yang tertulis pada sertifikat tanah",
+        "Hanya pihak yang pertama kali membeli tanah",
+        "Selalu penyewa dan pemilik secara bersamaan",
+      ],
+      answer: 0,
+      explanation:
+        "Pasal 4 UU PBB menekankan hak atau manfaat nyata atas bumi/bangunan; sertifikat bukan satu-satunya penentu.",
+      legal: "UU PBB Pasal 4 ayat (1)",
+    },
+    {
+      id: "pbb-002",
+      levels: B,
+      section: "subjek-objek",
+      kind: "kasus",
+      prompt:
+        "Pemilik hak areal kebun tidak jelas, sehingga DJP menetapkan PT Lestari yang memanfaatkan areal itu sebagai wajib pajak. PT Lestari menyatakan bukan subjek. Apa yang berlaku?",
+      options: [
+        "PT Lestari langsung mengajukan banding ke Pengadilan Pajak",
+        "PT Lestari memberi keterangan tertulis paling lama 1 bulan; DJP memutus paling lama 1 bulan",
+        "PT Lestari mengajukan keberatan paling lama 3 bulan; DJP memutus 12 bulan",
+        "Penetapan berlaku final dan tidak dapat dibantah",
+      ],
+      answer: 1,
+      explanation:
+        "Pasal 4 ayat (4)–(6): subjek yang ditetapkan memberi keterangan dalam 1 bulan, DJP memutus dalam 1 bulan, dan bila tidak diputus keterangannya dianggap disetujui. Jalur 3/12 bulan adalah keberatan atas SPPT/SKP.",
+      legal: "UU PBB Pasal 4 ayat (3) sampai (6)",
+    },
+    {
+      id: "pbb-003",
+      levels: B,
+      section: "subjek-objek",
+      kind: "konsep",
+      prompt: "Manakah objek yang TIDAK dikecualikan dari PBB?",
+      options: [
+        "Hutan lindung",
+        "Kuburan umum",
+        "Rumah sakit swasta yang dikelola untuk mencari keuntungan",
+        "Kantor perwakilan diplomatik berdasarkan asas timbal balik",
+      ],
+      answer: 2,
+      explanation:
+        "Pengecualian bidang kesehatan hanya untuk objek yang semata-mata untuk kepentingan umum dan tidak mencari keuntungan. Tiga objek lain dikecualikan Pasal 3 ayat (1).",
+      legal: "UU PBB Pasal 3 ayat (1)",
+    },
+    {
+      id: "pbb-004",
+      levels: B,
+      section: "subjek-objek",
+      kind: "kasus",
+      prompt:
+        "Di dalam areal perkebunan terdapat kebun produktif, perumahan karyawan, gudang, dan masjid yang terbuka untuk umum dan tidak mencari keuntungan. Bagian mana yang dikecualikan dari PBB?",
+      options: [
+        "Perumahan karyawan karena untuk kepentingan sosial",
+        "Gudang karena bukan areal produktif",
+        "Seluruh areal karena ada fasilitas ibadah",
+        "Masjid yang terbuka untuk umum",
+      ],
+      answer: 3,
+      explanation:
+        "Hanya objek yang semata-mata untuk kepentingan umum di bidang ibadah tanpa tujuan laba yang dikecualikan. Perumahan karyawan (emplasemen) dan gudang tetap objek PBB.",
+      legal: "UU PBB Pasal 3 ayat (1) huruf a",
+    },
+    // sektor-njop
+    {
+      id: "pbb-005",
+      levels: B,
+      section: "sektor-njop",
+      kind: "konsep",
+      prompt: "Manakah yang BUKAN sektor PBB yang dikelola DJP (PBB-P5L)?",
+      options: [
+        "Pertambangan mineral atau batubara",
+        "Perdesaan dan perkotaan",
+        "Perhutanan",
+        "Pertambangan panas bumi",
+      ],
+      answer: 1,
+      explanation:
+        "PBB perdesaan dan perkotaan (P2) adalah pajak daerah. P5L terdiri atas perkebunan, perhutanan, pertambangan (migas, panas bumi, minerba), dan sektor lainnya.",
+      legal: "PMK 186/2019 s.t.d.d. PMK 234/2022",
+    },
+    {
+      id: "pbb-006",
+      levels: B,
+      section: "sektor-njop",
+      kind: "konsep",
+      prompt: "Satu objek berada di perkebunan komersial dan satu lagi rumah tinggal biasa di permukiman. Objek mana yang dikenai PBB sektor perkebunan?",
+      options: [
+        "Keduanya karena sama-sama berupa tanah dan bangunan",
+        "Hanya rumah tinggal",
+        "Keduanya karena berada di kabupaten yang sama",
+        "Hanya objek perkebunan komersial",
+      ],
+      answer: 3,
+      explanation:
+        "Klasifikasi mengikuti sektor dan penggunaan. Rumah tinggal biasa masuk PBB-P2 yang dipungut pemerintah daerah.",
+      legal: "PMK 186/2019 s.t.d.d. PMK 234/2022",
+    },
+    {
+      id: "pbb-007",
+      levels: B,
+      section: "sektor-njop",
+      kind: "konsep",
+      prompt: "Pada sektor perkebunan, biaya investasi tanaman dimasukkan ke komponen NJOP mana?",
+      options: ["Areal produktif", "Areal emplasemen", "Areal pengaman", "Areal tidak produktif"],
+      answer: 0,
+      explanation:
+        "Investasi tanaman menambah nilai areal produktif. Areal pengaman, emplasemen, dan tidak produktif dinilai tanpa tanaman budidaya.",
+      legal: "PMK 186/2019 s.t.d.d. PMK 234/2022",
+    },
+    {
+      id: "pbb-008",
+      levels: B,
+      section: "sektor-njop",
+      kind: "konsep",
+      prompt: "Untuk objek pertambangan migas, kombinasi komponen NJOP mana yang benar?",
+      options: [
+        "Permukaan onshore dan offshore, tubuh bumi, serta bangunan",
+        "Tubuh bumi saja",
+        "Bangunan dan persediaan hasil produksi",
+        "Permukaan onshore saja",
+      ],
+      answer: 0,
+      explanation:
+        "NJOP migas meliputi bumi permukaan (onshore/offshore), tubuh bumi, dan bangunan. Persediaan bukan komponen NJOP.",
+      legal: "PMK 186/2019 s.t.d.d. PMK 234/2022",
+    },
+    {
+      id: "pbb-009",
+      levels: B,
+      section: "sektor-njop",
+      kind: "hitung",
+      prompt:
+        "Areal produktif kebun 12 ha bernilai tanah Rp25.000/m² dan biaya investasi tanaman Rp800 juta. Areal pengaman 2 ha bernilai Rp10.000/m². Tidak ada komponen lain. Berapa total NJOP?",
+      options: ["Rp3 miliar", "Rp3,8 miliar", "Rp3,2 miliar", "Rp4 miliar"],
+      answer: 3,
+      explanation:
+        "120.000 m² × Rp25.000 = Rp3 miliar; ditambah tanaman Rp800 juta dan areal pengaman 20.000 m² × Rp10.000 = Rp200 juta; total Rp4 miliar. Rp3,8 miliar melupakan areal pengaman.",
+      legal: "PMK 186/2019 s.t.d.d. PMK 234/2022",
+    },
+    {
+      id: "pbb-010",
+      levels: B,
+      section: "sektor-njop",
+      kind: "kasus",
+      prompt:
+        "NJOP areal produktif kebun Rp5 miliar sudah memasukkan investasi tanaman. Areal pengaman Rp600 juta dan bangunan Rp400 juta. Analis mengusulkan menambah investasi tanaman Rp1 miliar lagi. Berapa NJOP yang benar?",
+      options: [
+        "Rp7 miliar, dengan menambahkan investasi tanaman",
+        "Rp5,6 miliar, dengan mengeluarkan bangunan",
+        "Rp6 miliar, tanpa menghitung tanaman lagi",
+        "Rp5 miliar, karena areal pengaman bukan komponen",
+      ],
+      answer: 2,
+      explanation:
+        "Setiap komponen dihitung sekali: Rp5 miliar + Rp600 juta + Rp400 juta = Rp6 miliar. Menambah tanaman lagi berarti menghitung ganda.",
+      legal: "PMK 186/2019 s.t.d.d. PMK 234/2022",
+    },
+    {
+      id: "pbb-011",
+      levels: B,
+      section: "sektor-njop",
+      kind: "hitung",
+      prompt:
+        "Areal produktif kebun 25 ha bernilai tanah Rp18.000/m², investasi tanaman Rp1,5 miliar, dan bangunan Rp1,012 miliar. NJOPTKP Rp12 juta diterapkan di objek ini, NJKP 40%, tarif 0,5%. Berapa PBB terutang?",
+      options: ["Rp14 juta", "Rp35 juta", "Rp14,024 juta", "Rp9 juta"],
+      answer: 0,
+      explanation:
+        "Tanah 250.000 m² × Rp18.000 = Rp4,5 miliar; NJOP = Rp4,5 miliar + Rp1,5 miliar + Rp1,012 miliar = Rp7,012 miliar; dikurangi NJOPTKP menjadi Rp7 miliar; PBB = Rp7 miliar × 40% × 0,5% = Rp14 juta. Rp35 juta lupa NJKP.",
+      legal: "UU PBB Pasal 5 dan 6; PP 25/2002",
+    },
+    {
+      id: "pbb-012",
+      levels: B,
+      section: "sektor-njop",
+      kind: "konsep",
+      prompt: "Bila tidak terdapat transaksi jual beli yang wajar, bagaimana NJOP ditentukan?",
+      options: [
+        "Dengan nilai buku aset dalam laporan keuangan WP",
+        "Dengan perbandingan harga objek sejenis, nilai perolehan baru, atau NJOP pengganti",
+        "Dengan nilai yang dilaporkan WP di SPT Tahunan PPh",
+        "Dengan harga patokan yang ditetapkan pemerintah daerah",
+      ],
+      answer: 1,
+      explanation:
+        "Pasal 1 angka 3 UU PBB: NJOP berasal dari transaksi wajar, atau bila tidak ada, dari perbandingan harga, nilai perolehan baru, atau NJOP pengganti. Nilai buku bukan dasar NJOP.",
+      legal: "UU PBB Pasal 1 angka 3",
+    },
+    {
+      id: "pbb-013",
+      levels: B,
+      section: "sektor-njop",
+      kind: "konsep",
+      prompt: "Menurut UU PBB, seberapa sering NJOP ditetapkan?",
+      options: [
+        "Setiap tahun untuk semua daerah",
+        "Setiap lima tahun bersama sensus",
+        "Setiap tiga tahun, kecuali daerah tertentu setiap tahun",
+        "Hanya ketika WP mengajukan permohonan penilaian",
+      ],
+      answer: 2,
+      explanation:
+        "Pasal 6 ayat (2): NJOP ditetapkan setiap tiga tahun oleh Menteri Keuangan, kecuali untuk daerah tertentu setiap tahun sesuai perkembangan daerah.",
+      legal: "UU PBB Pasal 6 ayat (2)",
+    },
+    // njkp-tarif
+    {
+      id: "pbb-014",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "konsep",
+      prompt: "Urutan penghitungan PBB-P5L yang benar adalah?",
+      options: [
+        "NJOP × 0,5% − NJOPTKP, lalu × NJKP",
+        "NJOP × NJKP, lalu − NJOPTKP, lalu × 0,5%",
+        "NJOP × 0,5%, lalu × NJKP, lalu − Rp12 juta",
+        "NJOP − NJOPTKP, lalu × NJKP, lalu × 0,5%",
+      ],
+      answer: 3,
+      explanation:
+        "NJOPTKP dikurangkan dari NJOP terlebih dahulu, hasilnya dikalikan persentase NJKP, lalu tarif 0,5%.",
+      legal: "UU PBB Pasal 3 ayat (3), 5, 6",
+    },
+    {
+      id: "pbb-015",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "konsep",
+      prompt: "Berapa persentase NJKP untuk objek pertambangan mineral atau batubara menurut PP 25/2002?",
+      options: ["40%", "20%", "100%", "40% atau 20% tergantung NJOP Rp1 miliar"],
+      answer: 0,
+      explanation:
+        "PP 25/2002 menetapkan 40% untuk perkebunan, kehutanan, dan pertambangan. Pembedaan 40%/20% berdasarkan NJOP Rp1 miliar berlaku untuk objek lainnya.",
+      legal: "PP 25/2002 Pasal 1",
+    },
+    {
+      id: "pbb-016",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "konsep",
+      prompt: "Bagaimana NJOPTKP diberikan bila seorang WP memiliki beberapa objek PBB-P5L?",
+      options: [
+        "Rp12 juta untuk setiap objek",
+        "Rp12 juta satu kali, pada objek dengan NJOP terbesar",
+        "Rp12 juta satu kali, pada objek dengan NJOP terkecil",
+        "Dibagi rata ke seluruh objek",
+      ],
+      answer: 1,
+      explanation:
+        "NJOPTKP Rp12 juta diberikan untuk setiap wajib pajak, bukan setiap objek, dan dikurangkan pada objek dengan NJOP terbesar.",
+      legal: "UU PBB Pasal 3 ayat (3); PMK 23/PMK.03/2014",
+    },
+    {
+      id: "pbb-017",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "hitung",
+      prompt:
+        "WP memiliki objek perkebunan dengan NJOP Rp5 miliar dan objek minerba dengan NJOP Rp9 miliar. NJKP keduanya 40% dan tarif 0,5%. Berapa PBB objek perkebunan?",
+      options: ["Rp9,976 juta", "Rp25 juta", "Rp10 juta", "Rp20 juta"],
+      answer: 2,
+      explanation:
+        "NJOPTKP diterapkan pada objek minerba (NJOP terbesar), sehingga PBB perkebunan = Rp5 miliar × 40% × 0,5% = Rp10 juta. Rp9,976 juta salah karena NJOPTKP dikurangkan di objek yang lebih kecil.",
+      legal: "UU PBB Pasal 3 ayat (3); PP 25/2002",
+    },
+    {
+      id: "pbb-018",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "hitung",
+      prompt:
+        "PBB terutang objek perkebunan (satu-satunya objek WP) Rp30 juta, NJKP 40%, tarif 0,5%, dan NJOPTKP Rp12 juta. Berapa NJOP objek tersebut?",
+      options: ["Rp15 miliar", "Rp6 miliar", "Rp7,5 miliar", "Rp15,012 miliar"],
+      answer: 3,
+      explanation:
+        "NJOP setelah NJOPTKP = Rp30 juta ÷ 0,2% = Rp15 miliar; ditambah NJOPTKP menjadi Rp15,012 miliar. Rp6 miliar salah karena membagi dengan 0,5% tanpa NJKP.",
+      legal: "UU PBB Pasal 5 dan 6; PP 25/2002",
+    },
+    {
+      id: "pbb-019",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "hitung",
+      prompt:
+        "Objek PBB sektor lainnya memiliki NJOP Rp812 juta dan NJOPTKP Rp12 juta. Menurut PP 25/2002, objek lainnya dengan NJOP di bawah Rp1 miliar memakai NJKP 20%. Berapa PBB terutang?",
+      options: ["Rp800 ribu", "Rp1,6 juta", "Rp812 ribu", "Rp4 juta"],
+      answer: 0,
+      explanation:
+        "(Rp812 juta − Rp12 juta) × 20% × 0,5% = Rp800 juta × 0,1% = Rp800 ribu. Rp1,6 juta memakai NJKP 40%; Rp812 ribu lupa NJOPTKP.",
+      legal: "PP 25/2002 Pasal 1",
+    },
+    {
+      id: "pbb-020",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "konsep",
+      prompt: "Dengan NJKP 40% dan tarif 0,5%, berapa beban efektif PBB terhadap NJOP setelah NJOPTKP?",
+      options: ["0,5%", "0,2%", "0,4%", "2%"],
+      answer: 1,
+      explanation: "Beban efektif = 40% × 0,5% = 0,2% dari (NJOP − NJOPTKP).",
+      legal: "UU PBB Pasal 5; PP 25/2002",
+    },
+    {
+      id: "pbb-021",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "kasus",
+      prompt:
+        "Analis menghitung PBB kebun dengan NJOP Rp10,012 miliar sebagai: 0,5% × 40% × Rp10,012 miliar − Rp12 juta = Rp8,024 juta. Apa kesalahannya?",
+      options: [
+        "Tarif seharusnya 0,2% sehingga hasilnya dikalikan lagi",
+        "NJKP perkebunan seharusnya 20%",
+        "NJOPTKP harus dikurangkan dari NJOP, sehingga PBB benar Rp20 juta",
+        "Tidak ada kesalahan; NJOPTKP memang dikurangkan dari pajak",
+      ],
+      answer: 2,
+      explanation:
+        "NJOPTKP mengurangi NJOP, bukan pajak: (Rp10,012 miliar − Rp12 juta) × 40% × 0,5% = Rp20 juta. NJKP perkebunan tetap 40%.",
+      legal: "UU PBB Pasal 3 ayat (3) dan 6",
+    },
+    {
+      id: "pbb-022",
+      levels: B,
+      section: "njkp-tarif",
+      kind: "konsep",
+      prompt: "Bagaimana tarif PBB-P5L ditetapkan?",
+      options: [
+        "Progresif 0,1%–0,5% menurut Perda",
+        "Tarif tunggal 0,5% menurut UU PBB",
+        "Tarif 0,2% untuk perkebunan dan 0,5% untuk pertambangan",
+        "Ditetapkan per tahun oleh Kanwil DJP",
+      ],
+      answer: 1,
+      explanation:
+        "Pasal 5 UU PBB menetapkan tarif tunggal 0,5%. Angka 0,2% adalah beban efektif setelah NJKP 40%; tarif oleh Perda berlaku untuk PBB-P2.",
+      legal: "UU PBB Pasal 5",
+    },
+    // spop-sppt-skp
+    {
+      id: "pbb-023",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "konsep",
+      prompt: "Berapa lama SPOP harus dikembalikan kepada DJP setelah diterima subjek pajak?",
+      options: ["30 hari", "1 bulan kalender", "14 hari", "3 bulan"],
+      answer: 0,
+      explanation:
+        "Pasal 9 ayat (2) UU PBB: SPOP dikembalikan paling lambat 30 hari setelah diterima. Tiga bulan adalah batas keberatan.",
+      legal: "UU PBB Pasal 9",
+    },
+    {
+      id: "pbb-024",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "konsep",
+      prompt: "Pasangan batas pelunasan SPPT dan SKP PBB yang benar adalah?",
+      options: [
+        "SPPT 1 bulan; SKP 6 bulan sejak diterima",
+        "SPPT 3 bulan; SKP 1 bulan sejak diterima",
+        "SPPT 6 bulan; SKP 3 bulan sejak diterima",
+        "SPPT 6 bulan; SKP 1 bulan sejak diterima",
+      ],
+      answer: 3,
+      explanation: "Pasal 11 UU PBB: SPPT dilunasi paling lambat 6 bulan dan SKP paling lambat 1 bulan sejak diterima.",
+      legal: "UU PBB Pasal 11 ayat (1) dan (2)",
+    },
+    {
+      id: "pbb-025",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "kasus",
+      prompt: "SPPT PBB perkebunan diterima WP pada 10 Maret 2026. Kapan batas pelunasannya?",
+      options: ["10 September 2026", "10 April 2026", "10 Juni 2026", "31 Desember 2026"],
+      answer: 0,
+      explanation:
+        "Enam bulan sejak 10 Maret 2026 adalah 10 September 2026. 10 Juni adalah batas keberatan (3 bulan), 10 April batas bila diperlakukan seperti SKP.",
+      legal: "UU PBB Pasal 11 ayat (1)",
+    },
+    {
+      id: "pbb-026",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "kasus",
+      prompt:
+        "Pabrik kelapa sawit di areal perkebunan selesai dibangun pada 15 Januari 2026. Untuk tahun pajak berapa bangunan itu pertama kali diperhitungkan?",
+      options: [
+        "2026, karena selesai di awal tahun",
+        "2026, secara proporsional 11,5 bulan",
+        "2027, karena keadaan objek pada 1 Januari yang menentukan",
+        "2028, setelah penilaian ulang tiga tahunan",
+      ],
+      answer: 2,
+      explanation:
+        "Pasal 8 UU PBB: saat yang menentukan pajak terutang adalah keadaan objek pada 1 Januari. Pada 1 Januari 2026 bangunan belum ada, sehingga mulai tahun pajak 2027 tanpa proporsi.",
+      legal: "UU PBB Pasal 7 dan 8",
+    },
+    {
+      id: "pbb-027",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "hitung",
+      prompt:
+        "WP tidak mengembalikan SPOP setelah ditegur. DJP menghitung pokok PBB Rp20 juta secara jabatan. Berapa jumlah dalam SKP PBB?",
+      options: ["Rp20 juta", "Rp24 juta", "Rp30 juta", "Rp25 juta"],
+      answer: 3,
+      explanation:
+        "SKP karena SPOP tidak dikembalikan = pokok + denda 25% × pokok = Rp20 juta + Rp5 juta = Rp25 juta.",
+      legal: "UU PBB Pasal 10 ayat (2) dan (4)",
+    },
+    {
+      id: "pbb-028",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "hitung",
+      prompt:
+        "PBB menurut SPOP Rp40 juta, sedangkan hasil pemeriksaan menunjukkan Rp52 juta. Berapa jumlah yang tercantum dalam SKP PBB?",
+      options: ["Rp13 juta", "Rp15 juta", "Rp65 juta", "Rp12 juta"],
+      answer: 1,
+      explanation:
+        "SKP = selisih Rp12 juta + denda 25% × Rp12 juta (Rp3 juta) = Rp15 juta. Rp65 juta salah karena denda dihitung dari seluruh pokok hasil pemeriksaan.",
+      legal: "UU PBB Pasal 10 ayat (2) dan (3)",
+    },
+    {
+      id: "pbb-029",
+      levels: B,
+      section: "spop-sppt-skp",
+      kind: "hitung",
+      prompt:
+        "Pokok PBB dalam SPPT Rp10 juta baru dilunasi 30 bulan setelah jatuh tempo. Berapa denda administrasi yang ditagih?",
+      options: ["Rp6 juta", "Rp2,4 juta", "Rp4,8 juta", "Rp5 juta"],
+      answer: 2,
+      explanation:
+        "Denda 2% sebulan dibatasi paling lama 24 bulan: 24 × 2% × Rp10 juta = Rp4,8 juta. Rp6 juta salah karena menghitung 30 bulan penuh.",
+      legal: "UU PBB Pasal 11 ayat (3)",
+    },
+    // keberatan-banding
+    {
+      id: "pbb-030",
+      levels: B,
+      section: "keberatan-banding",
+      kind: "konsep",
+      prompt: "Pasangan batas pengajuan keberatan PBB dan batas DJP memutusnya yang benar adalah?",
+      options: [
+        "3 bulan sejak SPPT/SKP diterima; diputus 12 bulan",
+        "1 bulan sejak SPPT diterima; diputus 6 bulan",
+        "6 bulan sejak SPPT diterima; diputus 12 bulan",
+        "3 bulan sejak SPPT diterima; diputus 4 bulan",
+      ],
+      answer: 0,
+      explanation:
+        "Keberatan diajukan dalam 3 bulan sejak SPPT/SKP diterima dan diputus paling lama 12 bulan. Empat bulan adalah batas keputusan pengurangan PBB.",
+      legal: "UU PBB Pasal 15 dan 16",
+    },
+    {
+      id: "pbb-031",
+      levels: B,
+      section: "keberatan-banding",
+      kind: "kasus",
+      prompt: "SPPT diterima 5 April 2026 dan WP tidak sepakat dengan NJOP areal produktif. Kapan batas pengajuan keberatannya?",
+      options: ["5 Mei 2026", "5 Juli 2026", "5 Oktober 2026", "5 April 2027"],
+      answer: 1,
+      explanation:
+        "Tiga bulan sejak 5 April 2026 adalah 5 Juli 2026. 5 Oktober 2026 adalah batas pelunasan SPPT (6 bulan).",
+      legal: "UU PBB Pasal 15 ayat (3)",
+    },
+    {
+      id: "pbb-032",
+      levels: B,
+      section: "keberatan-banding",
+      kind: "kasus",
+      prompt:
+        "Surat keberatan atas SKP PBB diterima DJP pada 20 Januari 2026. Sampai 20 Januari 2027 DJP belum menerbitkan keputusan. Apa akibatnya?",
+      options: [
+        "Keberatan otomatis ditolak dan WP dapat banding",
+        "WP wajib mengajukan keberatan ulang",
+        "Jangka waktu diperpanjang 6 bulan",
+        "Keberatan dianggap diterima",
+      ],
+      answer: 3,
+      explanation:
+        "Bila 12 bulan terlampaui tanpa keputusan, keberatan dianggap diterima sesuai permohonan WP.",
+      legal: "UU PBB Pasal 16",
+    },
+    {
+      id: "pbb-033",
+      levels: B,
+      section: "keberatan-banding",
+      kind: "konsep",
+      prompt: "WP mengajukan keberatan atas SPPT PBB-P5L. Bagaimana kewajiban pembayarannya?",
+      options: [
+        "Pembayaran ditangguhkan sampai keputusan keberatan terbit",
+        "WP wajib melunasi 50% sebagai syarat keberatan",
+        "Keberatan tidak menunda kewajiban membayar PBB terutang",
+        "Pembayaran ditangguhkan sampai satu bulan setelah keputusan",
+      ],
+      answer: 2,
+      explanation:
+        "PMK 118/2024 Pasal 9 ayat (4): keberatan atas SPPT/SKP PBB tidak menunda kewajiban membayar. Penangguhan sampai satu bulan setelah keputusan berlaku untuk SKPKB, bukan SPPT.",
+      legal: "PMK 118/2024 Pasal 9",
+    },
+    {
+      id: "pbb-034",
+      levels: B,
+      section: "keberatan-banding",
+      kind: "konsep",
+      prompt: "Manakah yang TIDAK menjadi syarat pengajuan keberatan atas SPPT PBB?",
+      options: [
+        "Satu surat keberatan untuk satu SPPT",
+        "Ditulis dalam bahasa Indonesia dengan alasan yang jelas",
+        "Ditandatangani WP, wakil, atau kuasa",
+        "Melunasi seluruh PBB dalam SPPT sebelum keberatan diajukan",
+      ],
+      answer: 3,
+      explanation:
+        "Pelunasan bukan syarat formal keberatan PBB (syarat pelunasan berlaku bagi SKPKB yang disetujui dalam pembahasan akhir). Tiga lainnya syarat formal keberatan.",
+      legal: "UU PBB Pasal 15; PMK 118/2024 Pasal 9",
+    },
+    {
+      id: "pbb-035",
+      levels: B,
+      section: "keberatan-banding",
+      kind: "konsep",
+      prompt: "WP tidak puas atas keputusan keberatan PBB. Ke mana dan dalam berapa lama ia mengajukan upaya berikutnya?",
+      options: [
+        "Banding ke Pengadilan Pajak, 3 bulan sejak keputusan diterima",
+        "Keberatan kedua ke Kanwil DJP, 1 bulan",
+        "Gugatan ke PTUN, 90 hari",
+        "Peninjauan kembali ke Mahkamah Agung, 6 bulan",
+      ],
+      answer: 0,
+      explanation:
+        "Atas keputusan keberatan, WP dapat banding ke Pengadilan Pajak dalam 3 bulan sejak keputusan diterima.",
+      legal: "UU PBB Pasal 17; UU 14/2002",
+    },
+    // pengurangan
+    {
+      id: "pbb-036",
+      levels: B,
+      section: "pengurangan",
+      kind: "hitung",
+      prompt:
+        "PBB-P5L sebelum pengurangan Rp18 juta. Keputusan pengurangan memberi pengurangan 35% atas pokok. Berapa pokok yang masih perlu dibayar?",
+      options: ["Rp6,3 juta", "Rp18 juta", "Rp11,7 juta", "Rp12,6 juta"],
+      answer: 2,
+      explanation:
+        "Pengurangan = 35% × Rp18 juta = Rp6,3 juta; sisa pokok Rp11,7 juta. Rp6,3 juta adalah besarnya pengurangan, bukan sisa.",
+      legal: "UU PBB Pasal 19; PMK 129/2023",
+      source: "Try Out UKP Tingkat B",
+    },
+    {
+      id: "pbb-037",
+      levels: B,
+      section: "pengurangan",
+      kind: "konsep",
+      prompt: "Berapa batas maksimum pengurangan PBB menurut PMK 129/2023?",
+      options: [
+        "50% untuk semua alasan",
+        "75% untuk kondisi tertentu subjek; 100% untuk bencana alam atau sebab luar biasa",
+        "100% untuk kondisi subjek; 75% untuk bencana alam",
+        "75% untuk semua alasan",
+      ],
+      answer: 1,
+      explanation:
+        "Kondisi tertentu yang berhubungan dengan subjek (mis. kesulitan keuangan) paling tinggi 75%; bencana alam atau sebab luar biasa paling tinggi 100%.",
+      legal: "PMK 129/2023",
+    },
+    {
+      id: "pbb-038",
+      levels: B,
+      section: "pengurangan",
+      kind: "hitung",
+      prompt:
+        "WP badan mengalami rugi komersial dan kesulitan likuiditas dua tahun berturut-turut. PBB terutang Rp40 juta dan ia meminta pengurangan 90%. Berapa pokok minimal yang tetap harus dibayar bila pengurangan dikabulkan maksimal?",
+      options: ["Rp4 juta", "Rp30 juta", "Rp0", "Rp10 juta"],
+      answer: 3,
+      explanation:
+        "Kesulitan keuangan termasuk kondisi subjek dengan batas 75%: pengurangan maksimal Rp30 juta, sehingga minimal dibayar Rp10 juta. Rp4 juta salah karena mengabulkan 90%.",
+      legal: "PMK 129/2023",
+    },
+    {
+      id: "pbb-039",
+      levels: B,
+      section: "pengurangan",
+      kind: "konsep",
+      prompt: "Kapan batas pengajuan permohonan pengurangan PBB atas SPPT?",
+      options: [
+        "1 bulan sejak SPPT diterima",
+        "3 bulan sejak SPPT diterima",
+        "6 bulan sejak SPPT diterima",
+        "Kapan saja sebelum SPPT dilunasi",
+      ],
+      answer: 1,
+      explanation:
+        "Permohonan pengurangan atas SPPT diajukan paling lambat 3 bulan sejak SPPT diterima; untuk SKP atau STP batasnya 1 bulan sejak diterima.",
+      legal: "PMK 129/2023",
+    },
+    {
+      id: "pbb-040",
+      levels: B,
+      section: "pengurangan",
+      kind: "konsep",
+      prompt: "Permohonan pengurangan PBB diterima DJP pada 1 Maret 2026. Apa ketentuan jangka waktu keputusannya?",
+      options: [
+        "Paling lama 4 bulan; bila lewat dianggap dikabulkan",
+        "Paling lama 12 bulan; bila lewat dianggap ditolak",
+        "Paling lama 6 bulan; bila lewat dianggap ditolak",
+        "Tidak ada batas waktu keputusan",
+      ],
+      answer: 0,
+      explanation:
+        "PMK 129/2023 mewajibkan keputusan paling lama 4 bulan sejak permohonan diterima; bila lewat, permohonan dianggap dikabulkan. Dua belas bulan adalah batas keputusan keberatan.",
+      legal: "PMK 129/2023",
+    },
+    {
+      id: "pbb-041",
+      levels: B,
+      section: "pengurangan",
+      kind: "kasus",
+      prompt:
+        "Banjir besar yang statusnya ditetapkan pemerintah merusak areal kebun. WP belum mengajukan permohonan apa pun. Apa yang dapat dilakukan DJP?",
+      options: [
+        "Menunggu WP mengajukan keberatan dalam 3 bulan",
+        "Menerbitkan pembetulan SPPT secara jabatan",
+        "Kanwil DJP memberi pengurangan secara jabatan sampai 100%",
+        "Menghapus objek dari daftar PBB secara permanen",
+      ],
+      answer: 2,
+      explanation:
+        "PMK 129/2023 memberi Kanwil DJP kewenangan memberikan pengurangan secara jabatan sampai 100% atas PBB yang belum dibayar bagi objek terdampak bencana alam yang ditetapkan pemerintah.",
+      legal: "PMK 129/2023",
+    },
+    {
+      id: "pbb-042",
+      levels: B,
+      section: "pengurangan",
+      kind: "kasus",
+      prompt:
+        "WP sedang mengajukan keberatan atas SPPT karena NJOP dinilai terlalu tinggi, lalu ingin mengajukan pengurangan atas SPPT yang sama karena kesulitan likuiditas. Bagaimana?",
+      options: [
+        "Boleh diajukan bersamaan; DJP memilih yang lebih menguntungkan",
+        "Pengurangan wajib diajukan lebih dulu sebelum keberatan",
+        "Keduanya digabung dalam satu permohonan",
+        "Tidak dapat, kecuali keberatannya dicabut lebih dulu",
+      ],
+      answer: 3,
+      explanation:
+        "Syarat pengurangan: WP tidak sedang mengajukan keberatan atas SPPT/SKP yang sama, atau keberatan itu sudah dicabut.",
+      legal: "PMK 129/2023",
+    },
+    // pembetulan-pembatalan
+    {
+      id: "pbb-043",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "konsep",
+      prompt: "SPPT PBB memuat kesalahan penjumlahan luas. Jalur administratif apa yang tepat?",
+      options: ["Banding", "Pembetulan", "Pengurangan karena bencana", "Peninjauan kembali"],
+      answer: 1,
+      explanation:
+        "Pembetulan menangani kesalahan tulis, kesalahan hitung, dan kekeliruan penerapan ketentuan dalam SPPT, SKP PBB, atau STP PBB.",
+      legal: "Pasal 36 UU KUP; PMK 118/2024 Pasal 2",
+    },
+    {
+      id: "pbb-044",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "kasus",
+      prompt:
+        "SPPT objek pertama memuat salah hitung. Objek kedua terkena bencana sehingga WP ingin keringanan pokok. Pasangan tindakan mana yang sesuai?",
+      options: [
+        "Pengurangan untuk keduanya",
+        "Keberatan untuk keduanya",
+        "Pembatalan untuk objek pertama dan banding untuk objek kedua",
+        "Pembetulan untuk objek pertama dan pengurangan PBB untuk objek kedua",
+      ],
+      answer: 3,
+      explanation:
+        "Salah hitung diperbaiki melalui pembetulan; keringanan pokok karena bencana melalui permohonan pengurangan PBB Pasal 19.",
+      legal: "PMK 118/2024; PMK 129/2023",
+    },
+    {
+      id: "pbb-045",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "konsep",
+      prompt: "Permohonan pembetulan SPPT diterima DJP, tetapi setelah 6 bulan belum ada keputusan. Apa akibatnya?",
+      options: [
+        "Permohonan dianggap dikabulkan dan DJP menerbitkan keputusan sesuai permohonan",
+        "Permohonan dianggap ditolak",
+        "WP harus mengajukan keberatan",
+        "Jangka waktu otomatis diperpanjang 6 bulan",
+      ],
+      answer: 0,
+      explanation:
+        "PMK 118/2024 Pasal 6: keputusan pembetulan paling lama 6 bulan; bila lewat, permohonan dianggap dikabulkan dan keputusan diterbitkan paling lama 1 bulan kemudian.",
+      legal: "PMK 118/2024 Pasal 6",
+    },
+    {
+      id: "pbb-046",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "konsep",
+      prompt: "Manakah yang BUKAN ruang lingkup pembetulan SPPT PBB?",
+      options: [
+        "Salah tulis nama WP",
+        "Salah hitung perkalian luas dan NJOP per m²",
+        "Perbedaan pendapat tentang besarnya NJOP per m²",
+        "Kekeliruan penerapan persentase NJKP",
+      ],
+      answer: 2,
+      explanation:
+        "Sengketa nilai (materi) seperti besarnya NJOP diselesaikan melalui keberatan. Pembetulan untuk salah tulis, salah hitung, dan kekeliruan penerapan ketentuan.",
+      legal: "PMK 118/2024 Pasal 2 dan 5",
+    },
+    {
+      id: "pbb-047",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "konsep",
+      prompt: "Berapa kali WP dapat mengajukan permohonan pengurangan atau pembatalan SPPT/SKP PBB yang tidak benar?",
+      options: ["Satu kali", "Paling banyak dua kali", "Paling banyak tiga kali", "Tidak dibatasi"],
+      answer: 1,
+      explanation:
+        "PMK 118/2024 membatasi permohonan pengurangan atau pembatalan ketetapan yang tidak benar paling banyak dua kali; permohonan kedua diajukan dalam jangka 3 bulan yang ditentukan.",
+      legal: "PMK 118/2024 Pasal 32",
+    },
+    {
+      id: "pbb-048",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "kasus",
+      prompt:
+        "WP mengajukan keberatan atas SKP PBB lalu mencabutnya, dan pencabutan disetujui DJP. Jalur mana yang masih terbuka?",
+      options: [
+        "Mengajukan kembali keberatan atas SKP yang sama",
+        "Mengajukan pembatalan SKP PBB yang tidak benar",
+        "Mengajukan pengurangan denda administratif PBB",
+        "Mengajukan banding atas SKP PBB",
+      ],
+      answer: 2,
+      explanation:
+        "Setelah keberatan dicabut, WP tidak dapat mengajukan keberatan lagi maupun pengurangan/pembatalan ketetapan yang tidak benar, tetapi tetap dapat meminta pengurangan denda administratif PBB.",
+      legal: "PMK 118/2024 Pasal 56",
+    },
+    {
+      id: "pbb-049",
+      levels: B,
+      section: "pembetulan-pembatalan",
+      kind: "konsep",
+      prompt: "Dalam kondisi apa denda administratif PBB dapat dikurangkan atas permohonan WP?",
+      options: [
+        "Bila WP mengajukan keberatan atas pokoknya",
+        "Bila denda timbul karena kekhilafan atau bukan karena kesalahan WP",
+        "Bila WP telah melunasi pokok lebih dari 12 bulan",
+        "Bila NJOP objek turun pada tahun berikutnya",
+      ],
+      answer: 1,
+      explanation:
+        "PMK 118/2024 memungkinkan pengurangan denda administratif PBB karena kekhilafan atau bukan kesalahan WP (mis. denda pertama kali, akibat pihak ketiga, atau bencana), paling banyak dua kali.",
+      legal: "Pasal 36 UU KUP; PMK 118/2024 Pasal 27",
+    },
+  ],
+  flashcards: [
+    { front: "Subjek PBB", back: "Pihak yang secara nyata mempunyai hak/memperoleh manfaat atas bumi, atau memiliki/menguasai/memanfaatkan bangunan", levels: B, section: "subjek-objek" },
+    { front: "Keterangan atas penetapan subjek oleh DJP", back: "1 bulan; DJP memutus 1 bulan, lewat = disetujui", levels: B, section: "subjek-objek" },
+    { front: "Objek kepentingan umum yang dikecualikan", back: "Ibadah, sosial, kesehatan, pendidikan, kebudayaan nasional; tidak mencari untung", levels: B, section: "subjek-objek" },
+    { front: "Sektor PBB-P5L", back: "Perkebunan, perhutanan, pertambangan (migas, panas bumi, minerba), lainnya", levels: B, section: "sektor-njop" },
+    { front: "Investasi tanaman perkebunan masuk komponen", back: "Areal produktif", levels: B, section: "sektor-njop" },
+    { front: "Komponen NJOP migas/minerba", back: "Permukaan onshore/offshore, tubuh bumi, bangunan", levels: B, section: "sektor-njop" },
+    { front: "Siklus penetapan NJOP", back: "Setiap 3 tahun; daerah tertentu setiap tahun", levels: B, section: "sektor-njop" },
+    { front: "1 hektare", back: "10.000 m²", levels: B, section: "sektor-njop" },
+    { front: "NJOPTKP PBB selain P2", back: "Rp12 juta per WP (PMK 23/2014), sekali pada objek NJOP terbesar", levels: B, section: "njkp-tarif" },
+    { front: "NJKP perkebunan, kehutanan, pertambangan", back: "40% (PP 25/2002)", levels: B, section: "njkp-tarif" },
+    { front: "NJKP objek lainnya", back: "40% bila NJOP ≥ Rp1 miliar; 20% bila < Rp1 miliar", levels: B, section: "njkp-tarif" },
+    { front: "Rentang NJKP dalam UU PBB", back: "20%–100% dari NJOP", levels: B, section: "njkp-tarif" },
+    { front: "Tarif PBB dan beban efektif (NJKP 40%)", back: "0,5%; efektif 0,2% × (NJOP − NJOPTKP)", levels: B, section: "njkp-tarif" },
+    { front: "Saat menentukan PBB terutang", back: "Keadaan objek pada 1 Januari", levels: B, section: "spop-sppt-skp" },
+    { front: "Batas pengembalian SPOP", back: "30 hari setelah diterima", levels: B, section: "spop-sppt-skp" },
+    { front: "Batas pelunasan SPPT / SKP", back: "6 bulan / 1 bulan sejak diterima", levels: B, section: "spop-sppt-skp" },
+    { front: "Denda dalam SKP PBB", back: "25% dari selisih (hasil pemeriksaan) atau dari pokok (SPOP tidak kembali)", levels: B, section: "spop-sppt-skp" },
+    { front: "Denda telat bayar PBB", back: "2% sebulan, paling lama 24 bulan", levels: B, section: "spop-sppt-skp" },
+    { front: "Batas keberatan PBB", back: "3 bulan sejak SPPT/SKP diterima", levels: B, section: "keberatan-banding" },
+    { front: "Batas keputusan keberatan PBB", back: "12 bulan; lewat = dianggap diterima", levels: B, section: "keberatan-banding" },
+    { front: "Batas banding atas keputusan keberatan", back: "3 bulan sejak keputusan diterima, ke Pengadilan Pajak", levels: B, section: "keberatan-banding" },
+    { front: "Maksimum pengurangan PBB", back: "75% kondisi subjek; 100% bencana/sebab luar biasa", levels: B, section: "pengurangan" },
+    { front: "Batas permohonan pengurangan PBB", back: "3 bulan sejak SPPT; 1 bulan sejak SKP/STP", levels: B, section: "pengurangan" },
+    { front: "Batas keputusan pengurangan PBB", back: "4 bulan; lewat = dianggap dikabulkan (PMK 129/2023)", levels: B, section: "pengurangan" },
+    { front: "Pengurangan PBB secara jabatan", back: "Kanwil DJP, sampai 100%, objek terkena bencana alam", levels: B, section: "pengurangan" },
+    { front: "Ruang lingkup pembetulan", back: "Salah tulis, salah hitung, kekeliruan penerapan ketentuan", levels: B, section: "pembetulan-pembatalan" },
+    { front: "Batas keputusan pembetulan", back: "6 bulan; lewat = dianggap dikabulkan", levels: B, section: "pembetulan-pembatalan" },
+    { front: "Frekuensi permohonan pengurangan/pembatalan ketetapan tidak benar", back: "Paling banyak 2 kali", levels: B, section: "pembetulan-pembatalan" },
+  ],
+};
+
+export default content;

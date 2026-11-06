@@ -16,8 +16,8 @@ function UkpHome() {
         <BookOpen className="mb-5 size-8 text-primary" aria-hidden="true" />
         <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">Belajar UKP</h1>
         <p className="mt-3 max-w-[56ch] text-base leading-relaxed text-muted-foreground">
-          Baca rangkuman materi perpajakan, lalu uji pemahamanmu dengan latihan singkat dan
-          pembahasan di setiap topik.
+          Rangkuman per butir booklet, kartu hafalan angka penting, latihan soal dengan
+          pembahasan, dan simulasi ujian berwaktu untuk Tingkat A dan B.
         </p>
       </header>
       <section aria-labelledby="ukp-levels">

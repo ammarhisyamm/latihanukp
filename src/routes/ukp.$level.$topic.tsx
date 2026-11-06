@@ -1,38 +1,56 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { UkpQuiz } from "@/components/ukp-quiz";
-import { getUkpTopic, isUkpLevel, ukpHead } from "@/lib/ukp";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { UkpQuiz, type QuizMode } from "@/components/ukp-quiz";
+import { findUkpTopic, getUkpTopic, isUkpLevel, ukpHead, ukpTopics } from "@/lib/ukp";
+import { countCalculationPatterns } from "@/lib/ukp-calculations";
+import { topicDrill, topicPool } from "@/lib/ukp-pool";
+
+const modes = ["latihan", "simulasi", "ulang", "hitung"] as const;
 
 export const Route = createFileRoute("/ukp/$level/$topic")({
+  validateSearch: (search: Record<string, unknown>): { bagian?: string | undefined; mode?: QuizMode | undefined } => ({
+    bagian: typeof search["bagian"] === "string" ? search["bagian"] : undefined,
+    mode: modes.find((mode) => mode === search["mode"]),
+  }),
   loader: ({ params }) => {
     if (!isUkpLevel(params.level)) throw notFound();
-    const topic = getUkpTopic(params.level, params.topic);
-    if (!topic) throw notFound();
-    return { level: params.level, topic };
+    const slug = findUkpTopic(params.level, params.topic);
+    if (!slug) throw notFound();
+    return { level: params.level, slug, title: ukpTopics[slug].title };
   },
   head: ({ loaderData }) =>
     loaderData
       ? ukpHead(
-          `Latihan ${loaderData.topic.title} · UKP Tingkat ${loaderData.level.toUpperCase()}`,
-          "Latihan pilihan ganda dengan pembahasan.",
+          `Latihan ${loaderData.title} · UKP Tingkat ${loaderData.level.toUpperCase()}`,
+          "Latihan soal pilihan ganda dan simulasi ujian dengan pembahasan.",
         )
       : {},
   component: UkpPractice,
 });
 
 function UkpPractice() {
-  const data = Route.useLoaderData();
-  const { topic: slug } = Route.useParams();
+  const { level, slug } = Route.useLoaderData();
+  const { bagian, mode } = Route.useSearch();
+  const topic = getUkpTopic(level, slug)!;
   return (
     <UkpQuiz
-      key={`${data.level}/${slug}`}
+      key={`${level}/${slug}/${bagian ?? ""}/${mode ?? ""}`}
+      level={level}
       slug={slug}
-      level={data.level}
-      title={data.topic.title}
-      questions={data.topic.questions.map((question) => ({
-        ...question,
-        topic: data.topic.title,
-        pages: data.topic.pages,
-      }))}
+      title={topic.title}
+      questions={topicPool(topic)}
+      sections={topic.summary.map(({ id, title }) => ({ id, title }))}
+      drill={countCalculationPatterns(level, slug) ? () => topicDrill(level, topic) : undefined}
+      initialSection={bagian}
+      initialMode={mode}
+      back={
+        <Button variant="ghost" asChild>
+          <Link to="/ukp/$level" params={{ level }}>
+            <ArrowLeft aria-hidden="true" /> Daftar topik
+          </Link>
+        </Button>
+      }
     />
   );
 }

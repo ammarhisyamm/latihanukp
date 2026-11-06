@@ -1,46 +1,64 @@
-import type { Question } from "./ukp";
+import type { Question, UkpLevel } from "./ukp";
 
-export type PracticeItem = Question & { topic: string; pages: string };
+export type PracticeItem = Question & {
+  /** Judul topik untuk tampilan. */
+  topic: string;
+  topicSlug: string;
+  pages: string;
+  /** Judul bagian rangkuman. */
+  sectionTitle?: string | undefined;
+};
+
 const storageKey = "ukp:recent-questions:v1";
 
-export function shuffled<T>(items: readonly T[]): T[] {
+function read<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function write(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Latihan tetap jalan tanpa penyimpanan.
+  }
+}
+
+export function shuffled<T>(items: readonly T[], random: () => number = Math.random): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random() * (i + 1));
     [result[i], result[j]] = [result[j]!, result[i]!];
   }
   return result;
 }
 
 function loadHistory(): string[] {
-  try {
-    const history: unknown = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
-    return Array.isArray(history)
-      ? history.filter((item): item is string => typeof item === "string")
-      : [];
-  } catch {
-    return [];
-  }
+  const history: unknown = read(storageKey, []);
+  return Array.isArray(history)
+    ? history.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
-export function rememberQuestion(prompt: string) {
-  try {
-    const history = loadHistory().filter((item) => item !== prompt);
-    localStorage.setItem(storageKey, JSON.stringify([...history, prompt].slice(-3000)));
-  } catch {
-    // Practice remains available when storage is disabled.
-  }
+export function rememberQuestion(id: string) {
+  const history = loadHistory().filter((item) => item !== id);
+  write(storageKey, [...history, id].slice(-3000));
 }
 
-function spread(items: PracticeItem[], key: (item: PracticeItem) => string): PracticeItem[] {
-  const groups = new Map<string, PracticeItem[]>();
+/** Susun bergiliran antarkelompok supaya satu konsep tidak muncul berdekatan. */
+function spread<T>(items: T[], key: (item: T) => string): T[] {
+  const groups = new Map<string, T[]>();
   for (const item of items) {
     const group = groups.get(key(item)) ?? [];
     group.push(item);
     groups.set(key(item), group);
   }
   const rounds = Math.max(0, ...Array.from(groups.values(), (group) => group.length));
-  const result: PracticeItem[] = [];
+  const result: T[] = [];
   for (let i = 0; i < rounds; i++) {
     for (const group of groups.values()) {
       const item = group[i];
@@ -50,52 +68,54 @@ function spread(items: PracticeItem[], key: (item: PracticeItem) => string): Pra
   return result;
 }
 
+/**
+ * Pilih soal: yang belum pernah dilihat lebih dulu, lalu yang paling lama tidak dilihat.
+ * Soal disebar per bagian (dan per topik bila campuran) agar tidak beruntun satu konsep.
+ */
 export function pickQuestions(pool: PracticeItem[], size: number, balanceTopics: boolean) {
-  const recency = new Map(loadHistory().map((prompt, index) => [prompt, index]));
+  const recency = new Map(loadHistory().map((id, index) => [id, index]));
+  const unique = [...new Map(pool.map((question) => [question.id, question])).values()];
   const unseen: PracticeItem[] = [];
   const seen: PracticeItem[] = [];
-  for (const item of new Map(pool.map((question) => [question.prompt, question])).values()) {
-    (recency.has(questionKey(item)) ? seen : unseen).push(item);
-  }
-  const fresh = shuffled(unseen);
-  seen.sort((a, b) => recency.get(questionKey(a))! - recency.get(questionKey(b))!);
+  for (const item of unique) (recency.has(item.id) ? seen : unseen).push(item);
+  seen.sort((a, b) => recency.get(a.id)! - recency.get(b.id)!);
   const diversify = (items: PracticeItem[]) => {
-    const families = spread(items, (item) => item.family ?? item.topic);
-    return balanceTopics ? spread(families, (item) => item.topic) : families;
+    const bySection = spread(items, (item) => item.family ?? item.section ?? item.topicSlug);
+    return balanceTopics ? spread(bySection, (item) => item.topicSlug) : bySection;
   };
-  const ordered = [...diversify(fresh), ...diversify(seen)];
-  return ordered.slice(0, size);
+  return [...diversify(shuffled(unseen)), ...diversify(seen)].slice(0, size);
+}
+
+/** Acak urutan pilihan dan sesuaikan indeks jawaban. */
+export function withShuffledOptions<T extends Question>(item: T): T {
+  const options = shuffled(item.options) as T["options"];
+  return { ...item, options, answer: options.indexOf(item.options[item.answer]!) };
 }
 
 type Review = { streak: number; due: number };
-type ReviewHistory = Record<string, Review>;
+export type ReviewHistory = Record<string, Review>;
 
-type QuestionIdentity = Pick<Question, "id" | "prompt">;
-
-export function questionKey(item: QuestionIdentity) {
-  return item.id ?? item.prompt;
+export function questionKey(item: Pick<Question, "id">) {
+  return item.id;
 }
 
-export function loadReview(level: "a" | "b"): ReviewHistory {
-  try {
-    const entries: unknown = JSON.parse(localStorage.getItem(`ukp:review:v1:${level}`) ?? "{}");
-    if (!entries || typeof entries !== "object" || Array.isArray(entries)) return {};
-    return Object.fromEntries(
-      Object.entries(entries).filter(
-        ([, value]) =>
-          value &&
-          Number.isInteger(value.streak) &&
-          value.streak >= 0 &&
-          value.streak <= 3 &&
-          Number.isFinite(value.due),
-      ),
-    );
-  } catch {
-    return {};
-  }
+export function loadReview(level: UkpLevel): ReviewHistory {
+  const entries: unknown = read(`ukp:review:v1:${level}`, {});
+  if (!entries || typeof entries !== "object" || Array.isArray(entries)) return {};
+  return Object.fromEntries(
+    Object.entries(entries as Record<string, Review>).filter(
+      ([, value]) =>
+        value &&
+        Number.isInteger(value.streak) &&
+        value.streak >= 0 &&
+        value.streak <= 3 &&
+        Number.isFinite(value.due),
+    ),
+  );
 }
 
-export function recordAnswer(level: "a" | "b", question: QuestionIdentity, correct: boolean) {
+/** Jadwal ulang: salah → hari ini; benar → 1, 3, lalu 7 hari. */
+export function recordAnswer(level: UkpLevel, question: Pick<Question, "id">, correct: boolean) {
   const history = loadReview(level);
   const key = questionKey(question);
   const previous = history[key];
@@ -104,11 +124,7 @@ export function recordAnswer(level: "a" | "b", question: QuestionIdentity, corre
     const streak = correct ? Math.min((previous?.streak ?? 0) + 1, 3) : 0;
     const days = [0, 1, 3, 7][streak]!;
     history[key] = { streak, due: now + days * 86_400_000 };
-    try {
-      localStorage.setItem(`ukp:review:v1:${level}`, JSON.stringify(history));
-    } catch {
-      // Practice still works without persistent storage.
-    }
+    write(`ukp:review:v1:${level}`, history);
   }
   return history;
 }
@@ -126,4 +142,36 @@ export function dueQuestions(pool: PracticeItem[], history: ReviewHistory, size:
       return first.streak - second.streak || first.due - second.due;
     })
     .slice(0, size);
+}
+
+export type SessionResult = {
+  at: number;
+  mode: string;
+  scope: string;
+  correct: number;
+  total: number;
+  seconds: number;
+};
+
+export function loadResults(level: UkpLevel): SessionResult[] {
+  const results: unknown = read(`ukp:results:v1:${level}`, []);
+  return Array.isArray(results) ? (results as SessionResult[]) : [];
+}
+
+export function saveResult(level: UkpLevel, result: SessionResult) {
+  write(`ukp:results:v1:${level}`, [result, ...loadResults(level)].slice(0, 30));
+}
+
+/** Bagian rangkuman yang ditandai sudah dipahami. */
+export function loadUnderstood(level: UkpLevel): string[] {
+  const ids: unknown = read(`ukp:understood:v1:${level}`, []);
+  return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string") : [];
+}
+
+export function setUnderstood(level: UkpLevel, id: string, value: boolean) {
+  const ids = new Set(loadUnderstood(level));
+  if (value) ids.add(id);
+  else ids.delete(id);
+  write(`ukp:understood:v1:${level}`, [...ids]);
+  return [...ids];
 }

@@ -21,6 +21,6 @@ Peta di halaman Rujukan mencatat judul butir, halaman awal, dan dasar hukum yang
 
 ## Implementasi tahap latihan
 
-Bank sekarang memuat 192 soal tertulis, termasuk 12 adaptasi dari tiga PDF tryout Tingkat B, dan 1.024 variasi hitungan dari 32 pola. Variasi memakai angka yang menghasilkan perhitungan berbeda, dengan butir dan tautan aturan per pola. Kunci diperiksa ulang dengan rumus terpisah di pengujian. Latihan acak mendahulukan soal baru dan menyebar pola hitung. Mode ulang menyimpan jawaban yang perlu ditinjau dan menjadwalkan pengulangan per tingkat di browser.
+Sejak audit November 2026, bank memuat 438 soal kurasi di `src/lib/content`. Setiap soal ditautkan ke bagian rangkuman dan butir booklet. Variasi hitungan tidak lagi masuk bank. Variasi itu dipakai sebagai drill angka acak, satu soal per pola per sesi. Rincian temuan dan koreksi fakta ada di [audit soal dan materi](audit-soal-november-2026.md).
 
-Pemetaan soal tertulis lama, verifikasi pasal dan masa berlaku secara menyeluruh, simulasi berwaktu, dan panel review dengan penyimpanan bersama masih menjadi pekerjaan lanjutan.
+Verifikasi pasal dari teks peraturan untuk butir yang ditandai di laporan audit, serta panel review dengan penyimpanan bersama, masih menjadi pekerjaan lanjutan.

@@ -1,6 +1,6 @@
 # Latihan UKP
 
-Situs persiapan Uji Kompetensi Perpajakan Tingkat A dan B. Materi mencakup rumus, contoh langkah demi langkah, dan peta butir booklet. Bank latihan mencakup 192 soal tertulis dan 1.024 variasi hitungan. Riwayat latihan dan jadwal ulang disimpan per tingkat di browser.
+Situs persiapan Ujian Kompetensi Perpajakan (UKP) Tingkat A dan B. Setiap topik punya rangkuman per butir booklet (poin inti, tabel angka, jebakan soal), contoh langkah demi langkah, dan kartu hafalan. Bank latihan memuat 438 soal kurasi tanpa duplikat konsep, ditambah drill hitung dengan angka acak. Mode latihan mencakup latihan dengan pembahasan langsung, simulasi ujian berwaktu dengan navigasi nomor soal dan tanda ragu-ragu, serta ulang soal salah. Riwayat dan jadwal ulang disimpan per tingkat di browser.
 
 Situs publik tersedia di [latihanukp.vercel.app](https://latihanukp.vercel.app).
 
@@ -23,4 +23,4 @@ VERCEL=1 bun run build
 
 Build produksi memakai Nitro dengan preset Vercel. Aplikasi tidak memerlukan variabel lingkungan untuk materi atau latihan.
 
-Materi dan bank soal ada di `src/lib/ukp*.ts`. Cakupan, sumber, dan tahapan pengembangan dicatat di [rencana konten UKP](docs/ukp-content-plan.md).
+Rangkuman, soal, dan kartu hafalan ada di `src/lib/content/<topik>.ts` (tipe di `src/lib/content/types.ts`). Pola drill hitung ada di `src/lib/ukp-calculations.ts`. Hasil audit November 2026 dicatat di [audit soal dan materi](docs/audit-soal-november-2026.md). Cakupan, sumber, dan tahapan pengembangan dicatat di [rencana konten UKP](docs/ukp-content-plan.md).

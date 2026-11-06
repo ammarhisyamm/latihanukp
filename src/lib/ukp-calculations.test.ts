@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getBookletItems } from "./ukp-curriculum";
-import { getUkpTopic, ukpLevels } from "./ukp";
+import { ukpLevels } from "./ukp";
+import { drawCalculationQuestions, getCalculationQuestions } from "./ukp-calculations";
 
 const million = 1_000_000;
 const expected: Record<string, (n: number) => number> = {
@@ -44,7 +45,7 @@ describe("variasi hitungan UKP", () => {
     for (const level of ["a", "b"] as const) {
       for (const topic of ukpLevels[level]) {
         const itemNumbers = new Set(getBookletItems(level, topic).map(([number]) => number));
-        for (const question of getUkpTopic(level, topic)!.questions) {
+        for (const question of getCalculationQuestions(level, topic)) {
           if (!question.family || !question.id) continue;
           const i = Number(question.id.split("-").at(-1));
           const value = Number(question.options[question.answer]!.replace(/[^\d]/g, ""));
@@ -59,5 +60,11 @@ describe("variasi hitungan UKP", () => {
     }
     expect(variants.size).toBe(1024);
     expect(new Set(variants.values()).size).toBe(1024);
+  });
+
+  it("mengambil satu variasi per pola untuk drill", () => {
+    const drawn = drawCalculationQuestions("b", "ppn", () => 0.999);
+    expect(new Set(drawn.map((item) => item.family)).size).toBe(drawn.length);
+    expect(drawn.every((item) => item.id.endsWith("-32"))).toBe(true);
   });
 });
