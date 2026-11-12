@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { parseSourcePack } from "@/lib/ukp-source-pack";
 import { cn } from "@/lib/utils";
 import type { QuestionKind, UkpLevel } from "@/lib/ukp";
 import {
@@ -56,8 +57,10 @@ export type UkpQuizProps = {
   back: ReactNode;
 };
 
+type RunMode = QuizMode | "sumber";
+
 type Run = {
-  mode: QuizMode;
+  mode: RunMode;
   items: PracticeItem[];
   answers: (number | undefined)[];
   checked: boolean[];
@@ -73,12 +76,12 @@ export function UkpQuiz(props: UkpQuizProps) {
   const [review, setReview] = useState<ReviewHistory>({});
   useEffect(() => setReview(loadReview(props.level)), [props.level, run?.finishedAt]);
 
-  function start(mode: QuizMode, items: PracticeItem[], seconds?: number) {
+  function start(mode: RunMode, items: PracticeItem[], seconds?: number) {
     if (!items.length) return;
     const now = Date.now();
     setRun({
       mode,
-      items: items.map(withShuffledOptions),
+      items: mode === "sumber" ? items : items.map(withShuffledOptions),
       answers: items.map(() => undefined),
       checked: items.map(() => false),
       flagged: items.map(() => false),
@@ -92,6 +95,11 @@ export function UkpQuiz(props: UkpQuizProps) {
   function finish(current: Run) {
     if (current.finishedAt) return;
     const finishedAt = Date.now();
+    if (current.mode === "sumber") {
+      setRun({ ...current, finishedAt });
+      window.scrollTo({ top: 0 });
+      return;
+    }
     let correct = 0;
     current.items.forEach((item, i) => {
       const answer = current.answers[i];
@@ -137,7 +145,7 @@ export function UkpQuiz(props: UkpQuizProps) {
           level={props.level}
           slug={props.slug}
           mixed={!props.slug}
-          onRetryWrong={(items) => start("latihan", items)}
+          onRetryWrong={(items) => start(run.mode === "sumber" ? "sumber" : "latihan", items)}
           onAgain={() => setRun(undefined)}
         />
       )}
@@ -160,9 +168,20 @@ function Setup({
   onStart,
 }: UkpQuizProps & {
   review: ReviewHistory;
-  onStart: (mode: QuizMode, items: PracticeItem[], seconds?: number) => void;
+  onStart: (mode: RunMode, items: PracticeItem[], seconds?: number) => void;
 }) {
   const [mode, setMode] = useState<QuizMode>(initialMode);
+  const [sourceError, setSourceError] = useState("");
+  const advanced = questions.filter((item) => item.id.startsWith("ortax-pattern-"));
+
+  async function openSourceFile(file: File) {
+    try {
+      if (file.size > 2_000_000) throw new Error();
+      onStart("sumber", parseSourcePack(await file.text()));
+    } catch {
+      setSourceError("File paket soal tidak dapat dibuka. Pilih file JSON paket sumber.");
+    }
+  }
   const [section, setSection] = useState(
     sections.some((item) => item.id === initialSection) ? initialSection : "",
   );
@@ -192,7 +211,13 @@ function Setup({
     onStart(mode, items, mode === "simulasi" ? items.length * secondsPerQuestion : undefined);
   }
 
-  const modes: { id: QuizMode; icon: ReactNode; label: string; text: string; off?: boolean }[] = [
+  const modes: {
+    id: QuizMode;
+    icon: ReactNode;
+    label: string;
+    text: string;
+    off?: boolean;
+  }[] = [
     {
       id: "latihan",
       icon: <ListChecks aria-hidden="true" />,
@@ -361,7 +386,8 @@ function Setup({
           disabled={mode !== "hitung" && !pool.length}
         >
           {mode === "simulasi" ? "Mulai simulasi" : "Mulai"}
-          {actual !== undefined && ` · ${mode === "ulang" ? Math.min(20, pool.length) : actual} soal`}
+          {actual !== undefined &&
+            ` · ${mode === "ulang" ? Math.min(20, pool.length) : actual} soal`}
           <ArrowRight aria-hidden="true" />
         </Button>
         {mode !== "hitung" && !pool.length && (
@@ -370,6 +396,42 @@ function Setup({
           </p>
         )}
       </div>
+      {advanced.length > 0 && (
+        <Button
+          variant="outline"
+          className="self-start"
+          onClick={() => onStart("latihan", pickQuestions(advanced, advanced.length, !slug))}
+        >
+          Kasus lanjutan Ortax · {advanced.length} soal
+        </Button>
+      )}
+      {level === "b" && !slug && (
+        <section className="rounded-xl border bg-card p-4">
+          <h2 className="font-semibold">Soal asli dari paket sumber</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Buka paket JSON untuk berlatih dengan teks, urutan pilihan, dan kunci dari sumber. File
+            dibaca langsung di browser.
+          </p>
+          <label className="mt-3 block text-sm">
+            <span className="sr-only">Buka paket soal sumber</span>
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="max-w-full file:mr-3 file:rounded-md file:border file:bg-card file:px-3 file:py-2"
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                event.currentTarget.value = "";
+                if (file) void openSourceFile(file);
+              }}
+            />
+          </label>
+          {sourceError && (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              {sourceError}
+            </p>
+          )}
+        </section>
+      )}
       <p className="text-xs leading-relaxed text-muted-foreground">
         Soal yang belum pernah kamu lihat di browser ini diprioritaskan, dan urutan pilihan diacak.
         Simulasi adalah latihan mandiri. Jumlah soal dan durasi ujian resmi mengikuti pengumuman
@@ -432,9 +494,9 @@ function Runner({
   }, [remaining, run, onFinish]);
 
   useEffect(() => {
-    rememberQuestion(current.id);
+    if (!current.originalSource) rememberQuestion(current.id);
     heading.current?.focus({ preventScroll: true });
-  }, [current.id]);
+  }, [current.id, current.originalSource]);
 
   function update(patch: Partial<Run>) {
     setRun({ ...run, ...patch });
@@ -454,7 +516,7 @@ function Runner({
     if (answer === undefined || checked) return;
     const checkedList = [...run.checked];
     checkedList[run.index] = true;
-    recordAnswer(level, current, answer === current.answer);
+    if (!current.originalSource) recordAnswer(level, current, answer === current.answer);
     update({ checked: checkedList });
   }
   function toggleFlag() {
@@ -533,7 +595,9 @@ function Runner({
         <div className="h-1.5 overflow-hidden rounded-full bg-muted">
           <div
             className="h-full bg-primary transition-[width]"
-            style={{ width: `${((exam ? answered : run.checked.filter(Boolean).length) / run.items.length) * 100}%` }}
+            style={{
+              width: `${((exam ? answered : run.checked.filter(Boolean).length) / run.items.length) * 100}%`,
+            }}
           />
         </div>
 
@@ -551,7 +615,7 @@ function Runner({
           id="ukp-question"
           ref={heading}
           tabIndex={-1}
-          className="text-lg leading-relaxed font-semibold text-pretty outline-none sm:text-xl"
+          className="whitespace-pre-line text-lg leading-relaxed font-semibold text-pretty outline-none sm:text-xl"
         >
           {current.prompt}
         </h2>
@@ -587,7 +651,13 @@ function Runner({
                   )}
                   aria-hidden="true"
                 >
-                  {correct ? <Check className="size-4" /> : wrong ? <X className="size-4" /> : letters[i]}
+                  {correct ? (
+                    <Check className="size-4" />
+                  ) : wrong ? (
+                    <X className="size-4" />
+                  ) : (
+                    letters[i]
+                  )}
                 </span>
                 <span className="pt-0.5">{option}</span>
               </button>
@@ -635,7 +705,9 @@ function Runner({
                 size="lg"
                 aria-pressed={run.flagged[run.index]}
                 onClick={toggleFlag}
-                className={cn(run.flagged[run.index] && "border-[var(--orange-ink)] text-[var(--orange-ink)]")}
+                className={cn(
+                  run.flagged[run.index] && "border-[var(--orange-ink)] text-[var(--orange-ink)]",
+                )}
               >
                 <Flag aria-hidden="true" /> Ragu-ragu
               </Button>
@@ -678,9 +750,12 @@ function Runner({
                     "flex aspect-square w-full items-center justify-center rounded-md border text-xs font-medium tabular-nums",
                     state === "current" && "border-primary ring-2 ring-primary",
                     state === "done" && "border-primary bg-primary text-primary-foreground",
-                    state === "flag" && "border-[var(--orange-ink)] bg-[var(--brand-orange-soft)] text-[var(--orange-ink)]",
-                    state === "right" && "border-[var(--green-ink)] bg-[var(--soft-green)] text-[var(--green-ink)]",
-                    state === "wrong" && "border-destructive bg-[var(--error-soft)] text-destructive",
+                    state === "flag" &&
+                      "border-[var(--orange-ink)] bg-[var(--brand-orange-soft)] text-[var(--orange-ink)]",
+                    state === "right" &&
+                      "border-[var(--green-ink)] bg-[var(--soft-green)] text-[var(--green-ink)]",
+                    state === "wrong" &&
+                      "border-destructive bg-[var(--error-soft)] text-destructive",
                   )}
                 >
                   {i + 1}
@@ -693,7 +768,9 @@ function Runner({
           {exam ? (
             <>
               <Legend className="border-primary bg-primary">Dijawab</Legend>
-              <Legend className="border-[var(--orange-ink)] bg-[var(--brand-orange-soft)]">Ragu</Legend>
+              <Legend className="border-[var(--orange-ink)] bg-[var(--brand-orange-soft)]">
+                Ragu
+              </Legend>
               <Legend className="bg-background">Kosong</Legend>
             </>
           ) : (
@@ -761,12 +838,20 @@ function Explanation({
         </p>
       )}
       <p className="mt-2">{item.explanation}</p>
-      <p className="mt-2 text-xs text-muted-foreground">
-        {item.legal && `${item.legal} · `}
-        Booklet Tingkat {level.toUpperCase()}
-        {item.bookletItem && ` · butir ${item.bookletItem}`} · hlm. {item.bookletPage ?? item.pages}
-        {item.source && ` · pola soal: ${item.source}`}
-      </p>
+      {item.originalSource ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Kunci sumber {letters[item.answer]} · {item.originalSource.title} · hlm.{" "}
+          {item.originalSource.page} · Soal {item.originalSource.number}
+        </p>
+      ) : (
+        <p className="mt-2 text-xs text-muted-foreground">
+          {item.legal && `${item.legal} · `}
+          Booklet Tingkat {level.toUpperCase()}
+          {item.bookletItem && ` · butir ${item.bookletItem}`} · hlm.{" "}
+          {item.bookletPage ?? item.pages}
+          {item.source && ` · pola soal: ${item.source}`}
+        </p>
+      )}
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
         {item.section && (
           <Link
@@ -868,7 +953,11 @@ function Result({
             dijawab
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <Button size="lg" onClick={() => onRetryWrong(wrong.map((row) => row.item))} disabled={!wrong.length}>
+            <Button
+              size="lg"
+              onClick={() => onRetryWrong(wrong.map((row) => row.item))}
+              disabled={!wrong.length}
+            >
               <RotateCcw aria-hidden="true" /> Ulangi {wrong.length} soal salah
             </Button>
             <Button size="lg" variant="outline" onClick={onAgain}>
@@ -891,7 +980,10 @@ function Result({
           {groups.map((group) => {
             const pct = Math.round((group.right / group.total) * 100);
             return (
-              <li key={group.label} className="grid gap-1.5 text-sm sm:grid-cols-[14rem_1fr_4rem] sm:items-center">
+              <li
+                key={group.label}
+                className="grid gap-1.5 text-sm sm:grid-cols-[14rem_1fr_4rem] sm:items-center"
+              >
                 <span className="truncate">{group.label}</span>
                 <span className="h-2 overflow-hidden rounded-full bg-muted">
                   <span

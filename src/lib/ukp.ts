@@ -1,3 +1,4 @@
+import { getOrtaxAdvancedQuestions } from "./ukp-ortax-advanced";
 import { topicContent } from "./content";
 import type { Flashcard, SummarySection } from "./content";
 import { getBookletItems } from "./ukp-curriculum";
@@ -131,7 +132,10 @@ export function getUkpTopic(level: UkpLevel, slug: string): UkpTopicData | undef
   const pageOf = (number?: string) => items.find(([n]) => n === number)?.[2];
   const summary = content.summary
     .filter((section) => section.levels.includes(level))
-    .map((section) => ({ ...section, bookletPage: pageOf(section.bookletItem?.[level]) }));
+    .map((section) => ({
+      ...section,
+      bookletPage: pageOf(section.bookletItem?.[level]),
+    }));
   const sections = new Map(summary.map((section) => [section.id, section]));
   const data: UkpTopicData = {
     slug: key,
@@ -157,7 +161,15 @@ export function getUkpTopic(level: UkpLevel, slug: string): UkpTopicData | undef
           source: item.source,
           legal: item.legal,
         };
-      }),
+      })
+      .concat(
+        level === "b"
+          ? getOrtaxAdvancedQuestions(key).map((item) => ({
+              ...item,
+              section: summary.find((section) => section.bookletItem?.b === item.bookletItem)?.id,
+            }))
+          : [],
+      ),
     flashcards: content.flashcards.filter((card) => card.levels.includes(level)),
     guides: getUkpStudy(level, key),
   };

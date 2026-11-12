@@ -7,6 +7,7 @@ export type PracticeItem = Question & {
   pages: string;
   /** Judul bagian rangkuman. */
   sectionTitle?: string | undefined;
+  originalSource?: { title: string; page: number; number: number };
 };
 
 const storageKey = "ukp:recent-questions:v1";
