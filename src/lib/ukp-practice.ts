@@ -7,7 +7,6 @@ export type PracticeItem = Question & {
   pages: string;
   /** Judul bagian rangkuman. */
   sectionTitle?: string | undefined;
-  originalSource?: { title: string; page: number; number: number };
 };
 
 const storageKey = "ukp:recent-questions:v1";
@@ -87,8 +86,9 @@ export function pickQuestions(pool: PracticeItem[], size: number, balanceTopics:
   return [...diversify(shuffled(unseen)), ...diversify(seen)].slice(0, size);
 }
 
-/** Acak urutan pilihan dan sesuaikan indeks jawaban. */
+/** Acak pilihan dan sesuaikan indeks jawaban, kecuali pada soal asli. */
 export function withShuffledOptions<T extends Question>(item: T): T {
+  if (item.originalSource) return item;
   const options = shuffled(item.options) as T["options"];
   return { ...item, options, answer: options.indexOf(item.options[item.answer]!) };
 }

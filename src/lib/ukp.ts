@@ -1,4 +1,5 @@
 import { getOrtaxAdvancedQuestions } from "./ukp-ortax-advanced";
+import { getOrtaxOriginalQuestions } from "./ukp-ortax-original";
 import { topicContent } from "./content";
 import type { Flashcard, SummarySection } from "./content";
 import { getBookletItems } from "./ukp-curriculum";
@@ -21,6 +22,7 @@ export type Question = {
   bookletItem?: string | undefined;
   bookletPage?: number | undefined;
   source?: string | undefined;
+  originalSource?: { title: string; page: number; number: number };
   legal?: string | undefined;
   legalSource?: { label: string; href: string };
 };
@@ -164,10 +166,13 @@ export function getUkpTopic(level: UkpLevel, slug: string): UkpTopicData | undef
       })
       .concat(
         level === "b"
-          ? getOrtaxAdvancedQuestions(key).map((item) => ({
-              ...item,
-              section: summary.find((section) => section.bookletItem?.b === item.bookletItem)?.id,
-            }))
+          ? [
+              ...getOrtaxAdvancedQuestions(key).map((item) => ({
+                ...item,
+                section: summary.find((section) => section.bookletItem?.b === item.bookletItem)?.id,
+              })),
+              ...getOrtaxOriginalQuestions(key),
+            ]
           : [],
       ),
     flashcards: content.flashcards.filter((card) => card.levels.includes(level)),

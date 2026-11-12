@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { levelPool } from "./ukp-pool";
 import {
   dueQuestions,
   loadReview,
@@ -65,6 +66,31 @@ describe("latihan UKP", () => {
     const item = withShuffledOptions(question);
     expect(item.options[item.answer]).toBe("1");
     expect([...item.options].sort()).toEqual(["1", "2", "3", "4"]);
+  });
+
+  it("memasukkan soal asli ke Tingkat B dengan bagian materi, urutan pilihan, dan kunci asli", () => {
+    const originals = levelPool("b").filter((item) => item.originalSource);
+    expect(levelPool("a").some((item) => item.originalSource)).toBe(false);
+    expect(originals).toHaveLength(7);
+    expect(new Set(originals.map((item) => item.id)).size).toBe(
+      originals.length,
+    );
+    for (const item of originals) {
+      expect(item.sectionTitle, item.id).toBeTruthy();
+      expect(withShuffledOptions(item)).toBe(item);
+    }
+    const keys = Object.fromEntries(
+      originals.map(({ id, answer }) => [id, answer]),
+    );
+    expect(keys).toEqual({
+      "ortax-original-neto-dokter": 0,
+      "ortax-original-bukti-potong-nonresiden": 3,
+      "ortax-original-restitusi-banding": 1,
+      "ortax-original-dua-bukti-potong": 0,
+      "ortax-original-ppn-dibebaskan": 0,
+      "ortax-original-biaya-pemagangan": 1,
+      "ortax-original-kredit-pph-24": 0,
+    });
   });
 
   it("menyimpan bagian yang sudah dipahami per tingkat", () => {

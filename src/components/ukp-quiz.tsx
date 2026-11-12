@@ -15,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { parseSourcePack } from "@/lib/ukp-source-pack";
 import { cn } from "@/lib/utils";
 import type { QuestionKind, UkpLevel } from "@/lib/ukp";
 import {
@@ -57,10 +56,8 @@ export type UkpQuizProps = {
   back: ReactNode;
 };
 
-type RunMode = QuizMode | "sumber";
-
 type Run = {
-  mode: RunMode;
+  mode: QuizMode;
   items: PracticeItem[];
   answers: (number | undefined)[];
   checked: boolean[];
@@ -76,12 +73,12 @@ export function UkpQuiz(props: UkpQuizProps) {
   const [review, setReview] = useState<ReviewHistory>({});
   useEffect(() => setReview(loadReview(props.level)), [props.level, run?.finishedAt]);
 
-  function start(mode: RunMode, items: PracticeItem[], seconds?: number) {
+  function start(mode: QuizMode, items: PracticeItem[], seconds?: number) {
     if (!items.length) return;
     const now = Date.now();
     setRun({
       mode,
-      items: mode === "sumber" ? items : items.map(withShuffledOptions),
+      items: items.map(withShuffledOptions),
       answers: items.map(() => undefined),
       checked: items.map(() => false),
       flagged: items.map(() => false),
@@ -95,11 +92,6 @@ export function UkpQuiz(props: UkpQuizProps) {
   function finish(current: Run) {
     if (current.finishedAt) return;
     const finishedAt = Date.now();
-    if (current.mode === "sumber") {
-      setRun({ ...current, finishedAt });
-      window.scrollTo({ top: 0 });
-      return;
-    }
     let correct = 0;
     current.items.forEach((item, i) => {
       const answer = current.answers[i];
@@ -145,7 +137,7 @@ export function UkpQuiz(props: UkpQuizProps) {
           level={props.level}
           slug={props.slug}
           mixed={!props.slug}
-          onRetryWrong={(items) => start(run.mode === "sumber" ? "sumber" : "latihan", items)}
+          onRetryWrong={(items) => start("latihan", items)}
           onAgain={() => setRun(undefined)}
         />
       )}
@@ -168,20 +160,11 @@ function Setup({
   onStart,
 }: UkpQuizProps & {
   review: ReviewHistory;
-  onStart: (mode: RunMode, items: PracticeItem[], seconds?: number) => void;
+  onStart: (mode: QuizMode, items: PracticeItem[], seconds?: number) => void;
 }) {
   const [mode, setMode] = useState<QuizMode>(initialMode);
-  const [sourceError, setSourceError] = useState("");
   const advanced = questions.filter((item) => item.id.startsWith("ortax-pattern-"));
-
-  async function openSourceFile(file: File) {
-    try {
-      if (file.size > 2_000_000) throw new Error();
-      onStart("sumber", parseSourcePack(await file.text()));
-    } catch {
-      setSourceError("File paket soal tidak dapat dibuka. Pilih file JSON paket sumber.");
-    }
-  }
+  const originals = questions.filter((item) => item.originalSource);
   const [section, setSection] = useState(
     sections.some((item) => item.id === initialSection) ? initialSection : "",
   );
@@ -396,46 +379,36 @@ function Setup({
           </p>
         )}
       </div>
-      {advanced.length > 0 && (
-        <Button
-          variant="outline"
-          className="self-start"
-          onClick={() => onStart("latihan", pickQuestions(advanced, advanced.length, !slug))}
-        >
-          Kasus lanjutan Ortax · {advanced.length} soal
-        </Button>
-      )}
-      {level === "b" && !slug && (
-        <section className="rounded-xl border bg-card p-4">
-          <h2 className="font-semibold">Soal asli dari paket sumber</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Buka paket JSON untuk berlatih dengan teks, urutan pilihan, dan kunci dari sumber. File
-            dibaca langsung di browser.
-          </p>
-          <label className="mt-3 block text-sm">
-            <span className="sr-only">Buka paket soal sumber</span>
-            <input
-              type="file"
-              accept=".json,application/json"
-              className="max-w-full file:mr-3 file:rounded-md file:border file:bg-card file:px-3 file:py-2"
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0];
-                event.currentTarget.value = "";
-                if (file) void openSourceFile(file);
-              }}
-            />
-          </label>
-          {sourceError && (
-            <p role="alert" className="mt-2 text-sm text-destructive">
-              {sourceError}
-            </p>
+      {(originals.length > 0 || advanced.length > 0) && (
+        <div className="flex flex-wrap gap-3">
+          {originals.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => onStart("latihan", originals)}
+            >
+              Soal asli Ortax · {originals.length} soal
+            </Button>
           )}
-        </section>
+          {advanced.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() =>
+                onStart(
+                  "latihan",
+                  pickQuestions(advanced, advanced.length, !slug),
+                )
+              }
+            >
+              Kasus lanjutan Ortax · {advanced.length} soal
+            </Button>
+          )}
+        </div>
       )}
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Soal yang belum pernah kamu lihat di browser ini diprioritaskan, dan urutan pilihan diacak.
-        Simulasi adalah latihan mandiri. Jumlah soal dan durasi ujian resmi mengikuti pengumuman
-        BPPK.
+        Soal yang belum pernah kamu lihat di browser ini diprioritaskan.{" "}
+        {originals.length > 0 && "Urutan pilihan soal asli mengikuti sumber. "}
+        Simulasi adalah latihan mandiri. Jumlah soal dan durasi ujian resmi
+        mengikuti pengumuman BPPK.
       </p>
     </div>
   );
@@ -494,9 +467,9 @@ function Runner({
   }, [remaining, run, onFinish]);
 
   useEffect(() => {
-    if (!current.originalSource) rememberQuestion(current.id);
+    rememberQuestion(current.id);
     heading.current?.focus({ preventScroll: true });
-  }, [current.id, current.originalSource]);
+  }, [current.id]);
 
   function update(patch: Partial<Run>) {
     setRun({ ...run, ...patch });
@@ -516,7 +489,7 @@ function Runner({
     if (answer === undefined || checked) return;
     const checkedList = [...run.checked];
     checkedList[run.index] = true;
-    if (!current.originalSource) recordAnswer(level, current, answer === current.answer);
+    recordAnswer(level, current, answer === current.answer);
     update({ checked: checkedList });
   }
   function toggleFlag() {

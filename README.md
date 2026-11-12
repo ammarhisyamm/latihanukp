@@ -1,8 +1,8 @@
 # Latihan UKP
 
-Situs persiapan Ujian Kompetensi Perpajakan (UKP) Tingkat A dan B. Setiap topik punya rangkuman per butir booklet (poin inti, tabel angka, jebakan soal), contoh langkah demi langkah, dan kartu hafalan. Bank latihan memuat 454 soal kurasi, ditambah drill hitung dengan angka acak. Mode latihan mencakup latihan dengan pembahasan langsung, simulasi ujian berwaktu dengan navigasi nomor soal dan tanda ragu-ragu, serta ulang soal salah. Riwayat dan jadwal ulang disimpan per tingkat di browser.
+Situs persiapan Ujian Kompetensi Perpajakan (UKP) Tingkat A dan B. Setiap topik punya rangkuman per butir booklet (poin inti, tabel angka, jebakan soal), contoh langkah demi langkah, dan kartu hafalan. Bank latihan memuat 461 soal, ditambah drill hitung dengan angka acak. Mode latihan mencakup latihan dengan pembahasan langsung, simulasi ujian berwaktu dengan navigasi nomor soal dan tanda ragu-ragu, serta ulang soal salah. Riwayat dan jadwal ulang disimpan per tingkat di browser.
 
-Di Latihan Campuran Tingkat B, buka paket sumber JSON untuk berlatih dengan urutan pilihan dan kunci dari file. Paket dibaca di browser selama halaman terbuka.
+Tujuh soal asli Ortax tersedia di latihan per topik dan latihan campuran Tingkat B. Tombol Soal asli Ortax memulai sesi langsung dengan urutan pilihan dan kunci dari sumber.
 
 Situs publik tersedia di [latihanukp.vercel.app](https://latihanukp.vercel.app).
 
